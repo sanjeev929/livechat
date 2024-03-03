@@ -10,7 +10,7 @@ class UserRegistration(UserCreationForm):
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     bio = models.TextField(blank=True)
-    profile = models.ImageField(upload_to='profile_pics', blank=True)
+    profile = models.ImageField(upload_to='static/image', blank=True)
 
     def __str__(self):
         return self.user.username

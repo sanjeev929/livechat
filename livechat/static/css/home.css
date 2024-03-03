@@ -1,4 +1,25 @@
-/* Basic styling for the navigation bar */
+/* Reset default margin and padding */
+body, h1, h2, h3, h4, h5, h6, p, ul, ol, li, figure, figcaption, blockquote, dl, dd {
+    margin: 0;
+    padding: 0;
+}
+
+/* Box-sizing reset */
+*,
+*:before,
+*:after {
+    box-sizing: border-box;
+}
+
+/* Body styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Navigation bar */
 nav {
     background-color: #333;
     color: #fff;
@@ -11,7 +32,8 @@ nav ul {
     overflow: hidden;
 }
 nav ul li {
-    float: left;
+    display: inline-block;
+    vertical-align: middle;
 }
 nav ul li a {
     display: block;
@@ -22,6 +44,8 @@ nav ul li a {
 nav ul li a:hover {
     background-color: #555;
 }
+
+/* Dropdown menu */
 .dropdown-content {
     display: none;
     position: absolute;
@@ -41,48 +65,140 @@ nav ul li a:hover {
 .dropdown:hover .dropdown-content {
     display: block;
 }
-/* User details profile styles */
-#user-details {
+
+/* Edit profile container */
+.edit-profile-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 20px;
+}
+
+/* User details profile */
+.user-details-container {
     display: none;
     padding: 20px;
     border: 1px solid #ccc;
     margin-top: 20px;
     background-color: #f9f9f9;
 }
-#user-details h2 {
+.user-details-container h2 {
     margin-top: 0;
 }
-#user-details img {
-    width: 100px; /* Adjust size as needed */
-    height: 100px; /* Adjust size as needed */
-    border-radius: 50%; /* Make the image circular */
+.user-details-container img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
     margin-bottom: 10px;
 }
-/* Chat users list styles */
-#chat-users {
+
+/* Chat users list */
+.chat-users-container {
     margin-top: 20px;
 }
-#chat-users ul {
+.chat-users-container h2 {
+    margin-top: 0;
+}
+.chat-users-list {
     list-style: none;
     padding: 0;
 }
-#chat-users li {
+.chat-user-item {
     margin-bottom: 10px;
     cursor: pointer;
-    transition: transform 0.2s ease; /* Reduced transition time */
-    display: flex; /* Align image and text horizontally */
-    align-items: center; /* Center vertically */
+    transition: transform 0.2s ease;
+    display: flex;
+    align-items: center;
 }
-#chat-users li:hover {
-    transform: translateY(-5px); /* Move slightly upward on hover */
+.chat-user-item:hover {
+    transform: translateY(-5px);
 }
-#chat-users li img {
+.chat-user-img {
     width: 40px;
     height: 40px;
     border-radius: 50%;
     margin-right: 10px;
     vertical-align: middle;
 }
-#chat-users li span {
+.chat-user-name {
     vertical-align: middle;
+}
+
+/* Profile picture label */
+.profile-label {
+    display: block;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #ccc;
+    cursor: pointer;
+    margin: auto; /* Center the label horizontally */
+}
+
+/* Profile picture preview */
+.profile-preview {
+    max-width: 100%; /* Ensure the image does not exceed its container's width */
+    max-height: 100%; /* Ensure the image does not exceed its container's height */
+    width: auto; /* Allow the width to adjust based on the container */
+    height: auto; /* Allow the height to adjust based on the container */
+    object-fit: contain; /* Maintain the aspect ratio and fit the entire image within the container */
+    display: block; /* Ensure it's a block-level element */
+    margin: auto; /* Center the image horizontally */
+}
+.profile-preview1 {
+    width: 40%;
+    height: 40%;
+    
+}
+
+/* Button styles */
+button {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+button:hover {
+    background-color: #555;
+}
+
+/* Input styles */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+input[type="file"],
+input[type="submit"],
+textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+    background-color: #fff;
+    color: #333;
+    transition: border-color 0.3s ease;
+}
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="file"]:focus,
+input[type="submit"]:focus,
+textarea:focus {
+    outline: none;
+    border-color: #555;
 }

@@ -10,12 +10,12 @@
 <body>
     <nav>
         <ul>
-            <li><img id="profile-picture-nav" src="your_profile_picture.jpg" alt="Profile Picture"></li>
+            <li> <img id="profile-picture-preview" class="profile-preview1" src="{% static 'image/profile.png' %}" alt="Profile Picture"></li>
             <li><a href="#">Home</a></li>
             <li class="dropdown">
                 <a href="#">Profile</a>
                 <div class="dropdown-content">
-                    <a href="#" onclick="showProfileForm()">Edit Profile</a> <!-- Add onclick attribute -->
+                    <a href="#" onclick="showProfileForm()">Edit Profile</a>
                     <a href="#">Change Password</a>
                 </div>
             </li>
@@ -29,39 +29,50 @@
         </ul>
     </nav>
     
-    <div id="user-details">
+    <div id="user-details" class="user-details-container">
         <!-- User details profile -->
-        <img id="profile-picture" src="" alt="Profile Picture">
-        <h2 id="user-name">User Details</h2>
-        <p id="user-bio">User Bio</p>
-        <button id="follow-button">Follow</button>
+        <img id="profile-picture" class="profile-picture" src="" alt="Profile Picture">
+        <h2 id="user-name" class="user-name">User Details</h2>
+        <p id="user-bio" class="user-bio">User Bio</p>
+        <button id="follow-button" class="follow-button">Follow</button>
     </div>
 
-    <div id="edit-profile" style="display: none;">
+    <div id="edit-profile" class="edit-profile-container" style="display: none;">
         <!-- Edit profile form -->
-        <form id="edit-profile-form" method="POST" action="/submitbio/">
+        <br>
+        <form id="edit-profile-form" method="POST" action="/submitbio/" enctype="multipart/form-data">
             {% csrf_token %}
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email"><br><br>
-            <label for="bio">Bio:</label>
-            <textarea id="bio" name="bio"></textarea><br><br>
-            <label for="profile-picture">Profile Picture:</label>
-            <input type="file" id="profile-picture" name="profile_picture"><br><br>
-            <input type="submit" value="Save">
+            <label for="bio" class="edit-label">Bio:</label><br>
+            <textarea id="bio" name="bio" class="edit-textarea">{{bio}}</textarea><br>
+            <!-- Profile Picture -->
+            <label for="profile-picture-input" class="profile-label"><br>
+                {%if profile%}
+                <img id="profile-picture-preview" class="profile-preview" src="{{profile}}" alt="Profile Picture">
+                {%else%}
+                <img id="profile-picture-preview" class="profile-preview" src="{% static 'image/profile.png' %}" alt="Profile Picture">
+                {%endif%}
+            </label>
+            {%if new_path%}
+            <input type="file" id="profile-picture-input" name="profile" style="display: none;" value="{{new_path}}">
+            <canvas id="resizedCanvas" style="display: none;"></canvas>
+            <p>{{new_path}}</p>
+            {%else%}
+            <input type="file" id="profile-picture-input" name="profile" style="display: none;">
+            <canvas id="resizedCanvas" style="display: none;"></canvas>
+            {%endif%}
+            <br><br>
+            
+            <button type="submit" class="save-button">Save</button>
         </form>
     </div>
 
-    <div id="chat-users">
+    <div id="chat-users" class="chat-users-container">
         <!-- Chat users list -->
-        <h2>Chat Users</h2>
-        <ul>
-            <li onclick="showUserProfile('User1')">
-                <img src="user1_profile_picture.jpg" alt="User1">
-                <span>User1</span>
-            </li>
-            <li onclick="showUserProfile('User2')">
-                <img src="user2_profile_picture.jpg" alt="User2">
-                <span>User2</span>
+        <h2 class="chat-users-heading">Chat Users</h2>
+        <ul class="chat-users-list">
+            <li onclick="showUserProfile('User1')" class="chat-user-item">
+                <img src="{% static 'image/profile.png' %}" alt="User1" class="chat-user-img">
+                <span class="chat-user-name">User1</span>
             </li>
             <!-- Add more users as needed -->
         </ul>
@@ -79,7 +90,7 @@
             // Set user details and show the section
             userNameElement.textContent = userName;
             userBioElement.textContent = "Bio for " + userName;
-            profilePicture.src = userName + "_profile_picture.jpg"; // Adjust the path as needed
+            profilePicture.src = userName + "{% static 'image/profile.png' %}"; // Adjust the path as needed
             followButton.onclick = function() {
                 // Implement follow functionality here
                 alert('Follow ' + userName);

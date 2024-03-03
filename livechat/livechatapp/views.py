@@ -48,17 +48,26 @@ def home(request):
         user = User.objects.get(username=user_cookie)
         email = user.email
         try:
+            print("helo",email)
             user = User.objects.get(email=email)
+            print("============2222")
             user_profile = UserProfile.objects.get(user=user)
             bio = user_profile.bio
             profile = user_profile.profile
+            print(bio,type(profile),"=========")
+            parts = str(profile).split('/')
+            # Remove the first part ('static') and the second part ('image')
+            new_path = '/'.join(parts[2:])
+
         except:
             bio=None
+            new_path=None
             profile=None
-
+        print(bio,new_path,type(profile))
         context={
             "email":email,
             "bio":bio,
+            "new_path":new_path,
             "profile":profile,
         }
         return render(request,"home.html",context)
@@ -67,14 +76,31 @@ def home(request):
     
 def submitbio(request):
     user_cookie = request.COOKIES.get('user')
+    print(request.POST)
     if request.method == 'POST':
-        email = request.POST['email']  
-        bio = request.POST['bio'] 
-        profile = request.POST['profile']
-        user = User.objects.get(email=email)
-        user.userprofile.bio = bio
-        user.userprofile.profile = profile
-        user.userprofile.save()
+        bio = request.POST.get('bio')
+        try:
+            profile = request.FILES['profile']
+        except: 
+            profile = 5
+        print(profile)
+        try:
+            user = User.objects.get(username=user_cookie)
+            email=user.email
+            user = User.objects.get(email=email)
+            user_profile, created = UserProfile.objects.get_or_create(user=user)
+            user_profile.bio = bio
+            if profile != 5:
+                user_profile.profile = profile
+            else:
+                pass
+            user_profile.save()
+        except User.DoesNotExist:
+            # Handle the case where the user with the provided email does not exist
+            pass
+        except UserProfile.DoesNotExist:
+            # Handle the case where the user profile for the user does not exist
+            pass
         return redirect(home)
 
     return redirect(home)
