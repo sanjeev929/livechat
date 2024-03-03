@@ -10,7 +10,11 @@
 <body>
     <nav>
         <ul>
+            {%if profile%}
+            <li> <img id="profile-picture-preview" class="profile-preview1" src="{{profile}}" alt="Profile Picture"></li>
+            {%else%}
             <li> <img id="profile-picture-preview" class="profile-preview1" src="{% static 'image/profile.png' %}" alt="Profile Picture"></li>
+            {%endif%}
             <li><a href="#">Home</a></li>
             <li class="dropdown">
                 <a href="#">Profile</a>
@@ -55,7 +59,6 @@
             {%if new_path%}
             <input type="file" id="profile-picture-input" name="profile" style="display: none;" value="{{new_path}}">
             <canvas id="resizedCanvas" style="display: none;"></canvas>
-            <p>{{new_path}}</p>
             {%else%}
             <input type="file" id="profile-picture-input" name="profile" style="display: none;">
             <canvas id="resizedCanvas" style="display: none;"></canvas>

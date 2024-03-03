@@ -28,11 +28,9 @@ def login(request):
         password = request.POST['password']
         state=False
         user = authenticate(request, username=username, password=password)
-        print(username,password,user)
         if user is not None:
             state=True
             email = user.email
-            print(email)
             response = redirect(home)
             response.set_cookie('state', state)
             response.set_cookie('user', user)
@@ -48,13 +46,10 @@ def home(request):
         user = User.objects.get(username=user_cookie)
         email = user.email
         try:
-            print("helo",email)
             user = User.objects.get(email=email)
-            print("============2222")
             user_profile = UserProfile.objects.get(user=user)
             bio = user_profile.bio
             profile = user_profile.profile
-            print(bio,type(profile),"=========")
             parts = str(profile).split('/')
             # Remove the first part ('static') and the second part ('image')
             new_path = '/'.join(parts[2:])
@@ -63,7 +58,6 @@ def home(request):
             bio=None
             new_path=None
             profile=None
-        print(bio,new_path,type(profile))
         context={
             "email":email,
             "bio":bio,
@@ -76,14 +70,12 @@ def home(request):
     
 def submitbio(request):
     user_cookie = request.COOKIES.get('user')
-    print(request.POST)
     if request.method == 'POST':
         bio = request.POST.get('bio')
         try:
             profile = request.FILES['profile']
         except: 
             profile = 5
-        print(profile)
         try:
             user = User.objects.get(username=user_cookie)
             email=user.email
