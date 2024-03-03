@@ -1,99 +1,11 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat Application</title>
-    <style>
-        /* Basic styling for the navigation bar */
-        nav {
-            background-color: #333;
-            color: #fff;
-            padding: 10px;
-        }
-        nav ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-        }
-        nav ul li {
-            float: left;
-        }
-        nav ul li a {
-            display: block;
-            color: #fff;
-            padding: 10px 20px;
-            text-decoration: none;
-        }
-        nav ul li a:hover {
-            background-color: #555;
-        }
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #333;
-            min-width: 160px;
-            z-index: 1;
-        }
-        .dropdown-content a {
-            color: #fff;
-            padding: 10px 20px;
-            display: block;
-            text-decoration: none;
-        }
-        .dropdown-content a:hover {
-            background-color: #555;
-        }
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-        /* User details profile styles */
-        #user-details {
-            display: none;
-            padding: 20px;
-            border: 1px solid #ccc;
-            margin-top: 20px;
-            background-color: #f9f9f9;
-        }
-        #user-details h2 {
-            margin-top: 0;
-        }
-        #user-details img {
-            width: 100px; /* Adjust size as needed */
-            height: 100px; /* Adjust size as needed */
-            border-radius: 50%; /* Make the image circular */
-            margin-bottom: 10px;
-        }
-        /* Chat users list styles */
-        #chat-users {
-            margin-top: 20px;
-        }
-        #chat-users ul {
-            list-style: none;
-            padding: 0;
-        }
-        #chat-users li {
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: transform 0.2s ease; /* Reduced transition time */
-            display: flex; /* Align image and text horizontally */
-            align-items: center; /* Center vertically */
-        }
-        #chat-users li:hover {
-            transform: translateY(-5px); /* Move slightly upward on hover */
-        }
-        #chat-users li img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-        #chat-users li span {
-            vertical-align: middle;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/home.css' %}">
 </head>
 <body>
     <nav>
@@ -103,7 +15,7 @@
             <li class="dropdown">
                 <a href="#">Profile</a>
                 <div class="dropdown-content">
-                    <a href="#" onclick="showProfileForm()">Edit Profile</a>
+                    <a href="#" onclick="showProfileForm()">Edit Profile</a> <!-- Add onclick attribute -->
                     <a href="#">Change Password</a>
                 </div>
             </li>
@@ -125,6 +37,20 @@
         <button id="follow-button">Follow</button>
     </div>
 
+    <div id="edit-profile" style="display: none;">
+        <!-- Edit profile form -->
+        <form id="edit-profile-form" method="POST" action="/submitbio/">
+            {% csrf_token %}
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email"><br><br>
+            <label for="bio">Bio:</label>
+            <textarea id="bio" name="bio"></textarea><br><br>
+            <label for="profile-picture">Profile Picture:</label>
+            <input type="file" id="profile-picture" name="profile_picture"><br><br>
+            <input type="submit" value="Save">
+        </form>
+    </div>
+
     <div id="chat-users">
         <!-- Chat users list -->
         <h2>Chat Users</h2>
@@ -140,7 +66,8 @@
             <!-- Add more users as needed -->
         </ul>
     </div>
-
+    
+    <!-- JavaScript code -->
     <script>
         function showUserProfile(userName) {
             var userDetails = document.getElementById('user-details');
@@ -161,8 +88,8 @@
         }
 
         function showProfileForm() {
-            var profileForm = document.getElementById('profile-form');
-            profileForm.style.display = 'block';
+            var editProfile = document.getElementById('edit-profile');
+            editProfile.style.display = 'block';
         }
     </script>
 </body>

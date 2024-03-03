@@ -1,0 +1,88 @@
+/* Basic styling for the navigation bar */
+nav {
+    background-color: #333;
+    color: #fff;
+    padding: 10px;
+}
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+nav ul li {
+    float: left;
+}
+nav ul li a {
+    display: block;
+    color: #fff;
+    padding: 10px 20px;
+    text-decoration: none;
+}
+nav ul li a:hover {
+    background-color: #555;
+}
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #333;
+    min-width: 160px;
+    z-index: 1;
+}
+.dropdown-content a {
+    color: #fff;
+    padding: 10px 20px;
+    display: block;
+    text-decoration: none;
+}
+.dropdown-content a:hover {
+    background-color: #555;
+}
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+/* User details profile styles */
+#user-details {
+    display: none;
+    padding: 20px;
+    border: 1px solid #ccc;
+    margin-top: 20px;
+    background-color: #f9f9f9;
+}
+#user-details h2 {
+    margin-top: 0;
+}
+#user-details img {
+    width: 100px; /* Adjust size as needed */
+    height: 100px; /* Adjust size as needed */
+    border-radius: 50%; /* Make the image circular */
+    margin-bottom: 10px;
+}
+/* Chat users list styles */
+#chat-users {
+    margin-top: 20px;
+}
+#chat-users ul {
+    list-style: none;
+    padding: 0;
+}
+#chat-users li {
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: transform 0.2s ease; /* Reduced transition time */
+    display: flex; /* Align image and text horizontally */
+    align-items: center; /* Center vertically */
+}
+#chat-users li:hover {
+    transform: translateY(-5px); /* Move slightly upward on hover */
+}
+#chat-users li img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+#chat-users li span {
+    vertical-align: middle;
+}

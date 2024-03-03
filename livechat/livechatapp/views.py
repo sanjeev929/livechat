@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
-
+from . models import UserProfile
 def register(request):
     if request.method == 'POST':
         username = request.POST['username']
@@ -45,6 +45,36 @@ def home(request):
     state_cookie = request.COOKIES.get('state')
     user_cookie = request.COOKIES.get('user')
     if state_cookie and user_cookie:
-        return render(request,"home.html")
+        user = User.objects.get(username=user_cookie)
+        email = user.email
+        try:
+            user = User.objects.get(email=email)
+            user_profile = UserProfile.objects.get(user=user)
+            bio = user_profile.bio
+            profile = user_profile.profile
+        except:
+            bio=None
+            profile=None
+
+        context={
+            "email":email,
+            "bio":bio,
+            "profile":profile,
+        }
+        return render(request,"home.html",context)
     else:
         return render(request,"login.html")
+    
+def submitbio(request):
+    user_cookie = request.COOKIES.get('user')
+    if request.method == 'POST':
+        email = request.POST['email']  
+        bio = request.POST['bio'] 
+        profile = request.POST['profile']
+        user = User.objects.get(email=email)
+        user.userprofile.bio = bio
+        user.userprofile.profile = profile
+        user.userprofile.save()
+        return redirect(home)
+
+    return redirect(home)
