@@ -27,7 +27,7 @@
                 <a href="#">Settings</a>
                 <div class="dropdown-content">
                     <a href="#">Account Settings</a>
-                    <a href="#">Logout</a>
+                    <a href="/logout/">Logout</a>
                 </div>
             </li>
         </ul>
@@ -83,7 +83,8 @@
     
     <!-- JavaScript code -->
     <script>
-        function showUserProfile(userName) {
+        var currentusername="{{name}}"
+        function showUserProfile(userName, userBio, userProfile) {
             var userDetails = document.getElementById('user-details');
             var userNameElement = document.getElementById('user-name');
             var userBioElement = document.getElementById('user-bio');
@@ -92,18 +93,62 @@
 
             // Set user details and show the section
             userNameElement.textContent = userName;
-            userBioElement.textContent = "Bio for " + userName;
-            profilePicture.src = userName + "{% static 'image/profile.png' %}"; // Adjust the path as needed
-            followButton.onclick = function() {
-                // Implement follow functionality here
-                alert('Follow ' + userName);
-            };
+            userBioElement.textContent = userBio;
+            profilePicture.src = userProfile;
             userDetails.style.display = 'block';
+        }
+
+        // Update the chat users list HTML to include the user bio and profile
+        function updateChatUsersList(users) {
+            var chatUsersList = document.querySelector('.chat-users-list');
+            chatUsersList.innerHTML = '';
+
+            users.forEach(user => {
+                // Skip adding the current user's profile
+                console.log(user.name,currentusername)
+                if (user.name === currentusername) {
+                    return;
+                }
+
+                var listItem = document.createElement('li');
+                listItem.className = 'chat-user-item';
+                listItem.onclick = function() {
+                    showUserProfile(user.name, user.bio, user.profile);
+                };
+
+                var userImg = document.createElement('img');
+                userImg.src = user.profile;
+                userImg.alt = user.name;
+                userImg.className = 'chat-user-img';
+                listItem.appendChild(userImg);
+
+                var userName = document.createElement('span');
+                userName.className = 'chat-user-name';
+                userName.textContent = user.name;
+                listItem.appendChild(userName);
+
+                chatUsersList.appendChild(listItem);
+            });
         }
 
         function showProfileForm() {
             var editProfile = document.getElementById('edit-profile');
             editProfile.style.display = 'block';
+        }
+
+        // Fetch user details and update chat users list when the page loads
+        document.addEventListener("DOMContentLoaded", function() {
+            fetchUserDetails();
+        });
+
+        function fetchUserDetails() {
+            fetch("/get_user_details/")
+                .then(response => response.json())
+                .then(data => {
+                    // Update the chat users list with the received user details
+                    updateChatUsersList(data);
+                })
+                .catch(error => console.error('Error fetching user details:', error));
         }
     </script>
 </body>

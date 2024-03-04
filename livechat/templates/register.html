@@ -8,9 +8,10 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/home.css' %}">
 </head>
 <body>
-    <h2>User Registration</h2>
+    <div class="register-profile-container">
+    <h2>User Registration</h2><br>
     {% if error_message %}
-    <p>{{ error_message }}</p>
+    <p>{{ error_message }}</p><br>
     {% endif %}
     <form method="post" action="/register/">
         {% csrf_token %}
@@ -24,5 +25,6 @@
         <input type="password" id="confirm_password" name="confirm_password" required><br>
         <button type="submit">Register</button>
     </form>
+    </div>
 </body>
 </html>

@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from . models import UserProfile
@@ -38,6 +39,11 @@ def login(request):
         else:
             return render(request, 'login.html', {'error_message': 'Invalid username or password'})
     return render(request, 'login.html')
+def logout(request):
+    response = redirect(login)
+    response.delete_cookie('state')
+    response.delete_cookie('user')
+    return response
 
 def home(request):
     state_cookie = request.COOKIES.get('state')
@@ -63,6 +69,7 @@ def home(request):
             "bio":bio,
             "new_path":new_path,
             "profile":profile,
+            "name":user_cookie
         }
         return render(request,"home.html",context)
     else:
@@ -96,3 +103,14 @@ def submitbio(request):
         return redirect(home)
 
     return redirect(home)
+
+def get_user_details(request):
+    users = UserProfile.objects.all()  # Fetch all user profiles, adjust this query as per your actual model
+    user_data = []
+    for user in users:
+        user_data.append({
+            'name': user.user.username,  # Assuming user profile has a reference to the User model
+            'bio': user.bio,
+            'profile': user.profile.url  # Assuming you have a profile field in your model
+        })
+    return JsonResponse(user_data, safe=False)
