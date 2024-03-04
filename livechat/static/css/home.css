@@ -80,19 +80,28 @@ nav ul li a:hover {
 .login-profile-container  {
     align-self: center;
     width:400px;
-    height: 350px;
+    height: 400px;
     padding: 20px;
-    border-radius: 20%;
+    border-radius: 3%;
     border: 1px solid #605d5d00;
     margin-right: 20px;
     margin-top: 50px;
     background-color: #f9f9f9;
     margin-left: 550px;
 }
+.login-profile-container button,input{
+    margin-top: 15px;
+    margin-left: 0px;
+}
+.login-profile-container a {
+    position: relative; 
+    top: -55px; 
+    left: 250px;
+}
 .register-profile-container{
     align-self: center;
     width:500px;
-    height: 600px;
+    height: 580px;
     padding: 20px;
     border-radius: 3%;
     border: 1px solid #605d5d00;
@@ -104,6 +113,11 @@ nav ul li a:hover {
 .register-profile-container button,input{
     margin-top: 15px;
     margin-left: 0px;
+}
+.register-profile-container a {
+    position: relative; 
+    top: -55px; 
+    left: 350px;
 }
 /* User details profile */
 .user-details-container {
