@@ -1,4 +1,5 @@
 from django.urls import path
+from django.contrib.auth.views import LoginView
 from . import views
 
 urlpatterns=[
@@ -8,4 +9,5 @@ urlpatterns=[
     path("register/",views.register,name="register"),
     path("submitbio/",views.submitbio,name="submitbio"),
     path('get_user_details/', views.get_user_details, name='get_user_details'),
+    path("follow/",views.follow,name="follow"),
 ]

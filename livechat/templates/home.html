@@ -24,6 +24,12 @@
                 </div>
             </li>
             <li class="dropdown">
+                <a href="#" onclick="showNotifications()">Notifications <div class="notificontainer"><span id="notification-count">100</span></div></a>
+                <div class="dropdown-content" id="notification-dropdown">
+                    <!-- Notification list will be added here dynamically -->
+                </div>
+            </li>
+            <li class="dropdown">
                 <a href="#">Settings</a>
                 <div class="dropdown-content">
                     <a href="#">Account Settings</a>
@@ -39,6 +45,16 @@
         <h2 id="user-name" class="user-name">User Details</h2>
         <p id="user-bio" class="user-bio">User Bio</p>
         <button id="follow-button" class="follow-button">Follow</button>
+        <button id="unfollow-button" class="follow-button">Un Follow</button>
+    </div>
+
+    <div id="notification-details" class="user-details-container">
+        <!-- User details profile -->
+        <img id="profile-picture" class="profile-picture" src="" alt="Profile Picture">
+        <h2 id="user-name" class="user-name">User Details</h2>
+        <p id="user-bio" class="user-bio">User Bio</p>
+        <button id="follow-button" class="follow-button">Follow</button>
+        <button id="unfollow-button" class="follow-button">Un Follow</button>
     </div>
 
     <div id="edit-profile" class="edit-profile-container" style="display: none;">
@@ -105,11 +121,13 @@
 
             users.forEach(user => {
                 // Skip adding the current user's profile
-                console.log(user.name,currentusername)
+                console.log(user.following_profiles)
                 if (user.name === currentusername) {
                     return;
                 }
-
+                // if (user.follower_profiles.includes(user.name)) {
+                        
+                //     }    
                 var listItem = document.createElement('li');
                 listItem.className = 'chat-user-item';
                 listItem.onclick = function() {
@@ -133,7 +151,20 @@
 
         function showProfileForm() {
             var editProfile = document.getElementById('edit-profile');
-            editProfile.style.display = 'block';
+            if (editProfile.style.display === 'block') {
+                editProfile.style.display = 'none'; // Close the form if it's already open
+            } else {
+                editProfile.style.display = 'block'; // Otherwise, open the form
+            }
+        }
+
+        function showNotifications() {
+            var editProfile = document.getElementById('notification-details');
+            if (editProfile.style.display === 'block') {
+                editProfile.style.display = 'none'; // Close the form if it's already open
+            } else {
+                editProfile.style.display = 'block'; // Otherwise, open the form
+            }
         }
 
         // Fetch user details and update chat users list when the page loads
@@ -150,6 +181,77 @@
                 })
                 .catch(error => console.error('Error fetching user details:', error));
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById('follow-button').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default form submission behavior
+            
+            // Extract necessary data
+            var accountName = document.getElementById('user-name').textContent;
+            var followResponse = document.getElementById('follow-button').textContent;
+
+            // Get CSRF token
+            var csrftoken = getCookie('csrftoken');
+
+            // Send data to the backend using AJAX
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/follow/', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-CSRFToken', csrftoken); // Include CSRF token in headers
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Handle response from the server if needed
+                    console.log('Follow request sent successfully');
+                }
+            };
+            var data = JSON.stringify({ accountName: accountName, followResponse: followResponse });
+            xhr.send(data);
+        });
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById('unfollow-button').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default form submission behavior
+            
+            // Extract necessary data
+            var accountName = document.getElementById('user-name').textContent;
+            var followResponse = document.getElementById('unfollow-button').textContent;
+
+            // Get CSRF token
+            var csrftoken = getCookie('csrftoken');
+
+            // Send data to the backend using AJAX
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/follow/', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('X-CSRFToken', csrftoken); // Include CSRF token in headers
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    // Handle response from the server if needed
+                    console.log('Follow request sent successfully');
+                }
+            };
+            var data = JSON.stringify({ accountName: accountName, followResponse: followResponse });
+            xhr.send(data);
+        });
+    });
+
+    // Function to retrieve CSRF token from cookies
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
     </script>
 </body>
 </html>
