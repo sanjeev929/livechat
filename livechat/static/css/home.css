@@ -166,6 +166,46 @@ nav ul li a:hover {
     margin-left: 30px;
 }
 
+
+.notification-container {
+    width: 550px;
+    height: auto;
+    display: flex;
+    justify-content: center; /* Center the content horizontally */
+    align-items: center; /* Center the content vertically */
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid #605d5d00;
+    margin-top: 20px;
+    background-color: #f9f9f9;
+}
+
+.container-content {
+    display: flex;
+    align-items: center; /* Center items vertically */
+}
+
+.notification-container img {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    margin-right: 15px;
+}
+
+.notification-container .notification-containeruser-name {
+    font-size: 20px;
+    margin-right: 15px;
+}
+
+.notification-container .follower-buttons button,
+.notification-button {
+    width: 200px;
+    height: 25px;
+    margin-left: 10px;
+    /* Add additional styles for the .notification-button class here */
+}
+
+
 /* Chat users list */
 .chat-users-list {
     width: 20%; /* Adjust width as needed */

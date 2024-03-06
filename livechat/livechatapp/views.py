@@ -117,26 +117,24 @@ def get_user_details(request):
         current_user_profile = UserProfile.objects.get(user=current_user)
         followers = Follow.objects.filter(following=current_user_profile)
         followings = Follow.objects.filter(follower=current_user_profile)
-        print(followers,followings)
+
         user_data = []
+        follow_data = {
+            'follower_profiles': [{'username': follower.follower.user.username, 'profile_url': follower.follower.profile.url} for follower in followers],
+            'following_profiles': [{'username': following.following.user.username, 'profile_url': following.following.profile.url} for following in followings]
+        }
 
         for user_profile in UserProfile.objects.all():
             profile_url = None
             if user_profile.profile:
                 profile_url = user_profile.profile.url
-
-            follower_profiles = [follower.follower.user.username for follower in followers]
-            following_profiles = [following.following.user.username for following in followings]
-
             user_data.append({
                 'name': user_profile.user.username,
                 'bio': user_profile.bio,
                 'profile': profile_url,
-                'follower_profiles': follower_profiles,
-                'following_profiles':following_profiles
             })
-        print(follower_profiles)
-        return JsonResponse(user_data, safe=False)
+        print("----",follow_data)
+        return JsonResponse({'user_data': user_data, 'follow_data': follow_data})
 
     except User.DoesNotExist:
         return JsonResponse({'error': 'Current user does not exist'}, status=400)

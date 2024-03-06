@@ -48,13 +48,19 @@
         <button id="unfollow-button" class="follow-button">Un Follow</button>
     </div>
 
-    <div id="notification-details" class="user-details-container">
-        <!-- User details profile -->
-        <img id="profile-picture" class="profile-picture" src="" alt="Profile Picture">
-        <h2 id="user-name" class="user-name">User Details</h2>
-        <p id="user-bio" class="user-bio">User Bio</p>
-        <button id="follow-button" class="follow-button">Follow</button>
-        <button id="unfollow-button" class="follow-button">Un Follow</button>
+    <div id="notification-detailsall" class="notification-container" style="display: none;">
+        <ul class="followerchat-users-list">
+            <li class="followerchat-user-item">
+                <div class="container-content">
+                    <img class="followerprofile-picture" src="" alt="Profile Picture">
+                    <span class="followerchat-user-name">User1</span>
+                    <div class="follower-buttons">
+                        <button class="followerchat-user-action">Accept</button>
+                        <button class="followerchat-user-action">Decline</button>
+                    </div>
+                </div> 
+            </li>
+        </ul>
     </div>
 
     <div id="edit-profile" class="edit-profile-container" style="display: none;">
@@ -98,6 +104,8 @@
     </div>
     
     <!-- JavaScript code -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <script>
         var currentusername="{{name}}"
         function showUserProfile(userName, userBio, userProfile) {
@@ -113,21 +121,64 @@
             profilePicture.src = userProfile;
             userDetails.style.display = 'block';
         }
+        function updateNotificationDetails(users) {
+                var chatUsersList = document.querySelector('.followerchat-users-list');
+                chatUsersList.innerHTML = '';
+                var totalFollowerCount = 0;
 
-        // Update the chat users list HTML to include the user bio and profile
+                users.follower_profiles.forEach(profile => {
+                    var followerItem = document.createElement('li');
+                    followerItem.className = 'followerchat-user-item';
+
+                    var userImg = document.createElement('img');
+                    userImg.src = profile.profile_url;
+                    userImg.alt = profile.username;
+                    userImg.className = 'followerprofile-picture';
+                    followerItem.appendChild(userImg);
+
+                    var userName = document.createElement('span');
+                    userName.className = 'followerchat-user-name';
+                    userName.textContent = profile.username;
+                    followerItem.appendChild(userName);
+
+                    var followerButtons = document.createElement('div');
+                    followerButtons.className = 'follower-buttons';
+
+                    var acceptButton = document.createElement('button');
+                    acceptButton.textContent = 'Accept';
+                    acceptButton.className = 'followerchat-user-action';
+                    followerButtons.appendChild(acceptButton);
+
+                    var declineButton = document.createElement('button');
+                    declineButton.textContent = 'Decline';
+                    declineButton.className = 'followerchat-user-action';
+                    followerButtons.appendChild(declineButton);
+
+                    followerItem.appendChild(followerButtons);
+
+                    chatUsersList.appendChild(followerItem);
+                    totalFollowerCount++;
+                });
+
+                document.getElementById('notification-count').textContent = totalFollowerCount;
+                var notificationDetails = document.getElementById('notification-details');
+            }
+
+
+        // Function to update chat users list
         function updateChatUsersList(users) {
             var chatUsersList = document.querySelector('.chat-users-list');
             chatUsersList.innerHTML = '';
 
             users.forEach(user => {
                 // Skip adding the current user's profile
-                console.log(user.following_profiles)
+                if (user.follower_profiles ||user.followers_profile){
+                    return;
+                }
                 if (user.name === currentusername) {
                     return;
                 }
-                // if (user.follower_profiles.includes(user.name)) {
-                        
-                //     }    
+                
                 var listItem = document.createElement('li');
                 listItem.className = 'chat-user-item';
                 listItem.onclick = function() {
@@ -149,6 +200,7 @@
             });
         }
 
+
         function showProfileForm() {
             var editProfile = document.getElementById('edit-profile');
             if (editProfile.style.display === 'block') {
@@ -159,28 +211,28 @@
         }
 
         function showNotifications() {
-            var editProfile = document.getElementById('notification-details');
+            var editProfile = document.getElementById('notification-detailsall');
             if (editProfile.style.display === 'block') {
                 editProfile.style.display = 'none'; // Close the form if it's already open
             } else {
                 editProfile.style.display = 'block'; // Otherwise, open the form
             }
         }
-
-        // Fetch user details and update chat users list when the page loads
-        document.addEventListener("DOMContentLoaded", function() {
-            fetchUserDetails();
+        $.ajax({
+            url: '/get_user_details/',  // Replace '/your-url/' with the actual URL endpoint
+            type: 'GET',
+            success: function(response) {
+                var userData = response.user_data;
+                var followData = response.follow_data;
+                updateChatUsersList(userData)
+                updateNotificationDetails(followData)
+                // Process userData and followData as needed
+            },
+            error: function(xhr, status, error) {
+                // Handle errors here
+                console.error('Error:', error);
+            }
         });
-
-        function fetchUserDetails() {
-            fetch("/get_user_details/")
-                .then(response => response.json())
-                .then(data => {
-                    // Update the chat users list with the received user details
-                    updateChatUsersList(data);
-                })
-                .catch(error => console.error('Error fetching user details:', error));
-        }
 
         document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('follow-button').addEventListener('click', function(event) {
