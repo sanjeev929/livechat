@@ -168,42 +168,54 @@ nav ul li a:hover {
 
 
 .notification-container {
-    width: 550px;
-    height: auto;
-    display: flex;
-    justify-content: center; /* Center the content horizontally */
-    align-items: center; /* Center the content vertically */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    border: 1px solid #ccc;
     padding: 20px;
-    border-radius: 10px;
-    border: 1px solid #605d5d00;
-    margin-top: 20px;
-    background-color: #f9f9f9;
+    width: 400px; /* Adjust container width as needed */
+    max-height: 200px; /* Adjust container height as needed */
+    overflow-y: scroll;
+    direction: ltr; /* Left-to-right direction for scrolling */
 }
 
-.container-content {
-    display: flex;
-    align-items: center; /* Center items vertically */
-}
-
-.notification-container img {
-    width: 70px;
+.notification-container img.followerprofile-picture {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%; /* Ensures the image doesn't exceed container width */
+    height: auto; /* Maintains aspect ratio */
+    object-fit: cover; /* Ensure the image covers the entire area */
+    border-radius: 5%; /* Display the image in a round shape */
+    width: 150px;
     height: 70px;
-    border-radius: 50%;
-    margin-right: 15px;
 }
 
-.notification-container .notification-containeruser-name {
-    font-size: 20px;
-    margin-right: 15px;
+.notification-container .followerchat-user-item {
+    margin-bottom: 200px; /* Add margin between list items */
+}
+.followerchat-user-name{
+    width: 500px;
+    margin-left: calc((100% - 150px) / 2);
+}
+.follower-buttons{
+    margin-left: 45px;
+}
+.notification-container .followerchat-users-list {
+    list-style-type: none; /* Removes bullets from the list */
 }
 
-.notification-container .follower-buttons button,
-.notification-button {
-    width: 200px;
-    height: 25px;
-    margin-left: 10px;
-    /* Add additional styles for the .notification-button class here */
+.notification-container::-webkit-scrollbar {
+    width: 8px; /* Width of the scrollbar */
 }
+
+.notification-container::-webkit-scrollbar-thumb {
+    background-color: #888; /* Color of the scrollbar thumb */
+    border-radius: 4px;
+}
+
+
 
 
 /* Chat users list */
