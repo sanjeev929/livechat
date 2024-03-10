@@ -69,22 +69,26 @@ nav ul li a:hover {
 /* Edit profile container */
 .notificontainer {
     position: absolute;
-    width: auto;
-    height: auto;
-    top: 44px;
-    left: 445px;
-    transform: translate(-50%, -50%);
-    background-color: #2c2c2c;
-    padding: 5px; /* Adjust padding to control the size */
-    border-radius: 20px; /* Adjust border radius to make the container more visible */
-    border: 2px solid rgba(255, 255, 255, 0.511);
-    font-size: 12px; /* Adjust font size to make the container smaller */
-}
-.notificontainer span {
-    color: red;
+    top: -5px;
+    right: -10px;
+    width: 20px;
+    height: 20px;
+    background-color: red;
+    border-radius: 50%; /* Makes the container circular */
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
     font-weight: bold;
-    font-size: 14px;
+    color: white;
 }
+
+/* Adjust this style if you want the circle to be hidden when there are no notifications */
+.notificontainer:empty {
+    display: none;
+}
+
 .edit-profile-container {
     position: absolute;
     top: 50%;
@@ -172,19 +176,20 @@ nav ul li a:hover {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background-color: #fff;
-    border: 1px solid #ccc;
+    background-color: #ffffff;
+    border: 2px solid rgb(255, 255, 255);
+    border-radius: 20px;
     padding: 20px;
-    width: 400px; /* Adjust container width as needed */
-    max-height: 200px; /* Adjust container height as needed */
+    width: 600px;
+    max-height: 200px; 
     overflow-y: scroll;
-    direction: ltr; /* Left-to-right direction for scrolling */
+    direction: ltr;
 }
 
 .notification-container img.followerprofile-picture {
     display: block;
     margin: 0 auto;
-    max-width: 100%; /* Ensures the image doesn't exceed container width */
+    max-width: 100%; 
     height: auto; /* Maintains aspect ratio */
     object-fit: cover; /* Ensure the image covers the entire area */
     border-radius: 5%; /* Display the image in a round shape */
@@ -193,20 +198,25 @@ nav ul li a:hover {
 }
 
 .notification-container .followerchat-user-item {
-    margin-bottom: 200px; /* Add margin between list items */
+    display: flex; /* Use flexbox for layout */
+    align-items: center; /* Align items vertically */
+    margin-bottom: 20px; /* Adjust margin between list items */
 }
-.followerchat-user-name{
-    width: 500px;
-    margin-left: calc((100% - 150px) / 2);
+
+.followerchat-user-name {
+    flex: 1; /* Allow the name to take up remaining space */
+    margin-left: 20px; /* Adjust margin between name and image */
 }
-.follower-buttons{
-    margin-left: 45px;
+
+.follower-buttons {
+    margin-left: auto; /* Push buttons to the right */
 }
 .notification-container .followerchat-users-list {
     list-style-type: none; /* Removes bullets from the list */
 }
 
 .notification-container::-webkit-scrollbar {
+    display: none;
     width: 8px; /* Width of the scrollbar */
 }
 

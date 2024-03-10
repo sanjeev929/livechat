@@ -1,11 +1,5 @@
 from django.db import models
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-
-class UserRegistration(UserCreationForm):
-    class Meta:
-        model = User
-        fields = ['username', 'email', 'password1', 'password2']
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -25,3 +19,10 @@ class Follow(models.Model):
 
     def __str__(self):
         return f'{self.follower.user.username} follows {self.following.user.username}'
+
+class FollowAction(models.Model):
+    user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    action = models.CharField(max_length=10)  # 'accept' or 'decline'
+
+    def __str__(self):
+        return f'{self.action} action for {self.user_profile}'

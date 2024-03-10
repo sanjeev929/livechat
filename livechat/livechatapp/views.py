@@ -1,9 +1,9 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,get_object_or_404
 import json
-from django.http import JsonResponse
+from django.http import JsonResponse,Http404
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
-from . models import UserProfile,Follow
+from . models import UserProfile,Follow,FollowAction
 
 def register(request):
     if request.method == 'POST':
@@ -55,7 +55,10 @@ def home(request):
     except:
         return redirect(login)    
     if state_cookie and user_cookie:
-        user = User.objects.get(username=user_cookie)
+        try:
+            user = User.objects.get(username=user_cookie)
+        except:
+            return redirect(login)
         email = user.email
         try:
             user = User.objects.get(email=email)
@@ -111,35 +114,80 @@ def submitbio(request):
     return redirect(home)
 
 def get_user_details(request):
+    followed_users = []
+    user_data = []
     try:
-        current_user_name = request.COOKIES.get('user')
-        current_user = User.objects.get(username=current_user_name)
-        current_user_profile = UserProfile.objects.get(user=current_user)
-        followers = Follow.objects.filter(following=current_user_profile)
-        followings = Follow.objects.filter(follower=current_user_profile)
+        try:
+            current_user_name = request.COOKIES.get('user')
+            print(current_user_name)
+            current_user = User.objects.get(username=current_user_name)
+            current_user_profile = UserProfile.objects.get(user=current_user)
+            follows = Follow.objects.filter(follower=current_user_profile)
 
-        user_data = []
-        follow_data = {
-            'follower_profiles': [{'username': follower.follower.user.username, 'profile_url': follower.follower.profile.url} for follower in followers],
-            'following_profiles': [{'username': following.following.user.username, 'profile_url': following.following.profile.url} for following in followings]
-        }
+        
+            for follow_instance in follows:
+                followed_user_profile = follow_instance.following
+                followed_users.append({
+                    'username': followed_user_profile.user.username,
+                    'profile_url': followed_user_profile.profile.url
+                })
+            print("Followed users:", followed_users)
+        except:
+            pass
+        try:
+            current_user_name = request.COOKIES.get('user')
+            current_user = User.objects.get(username=current_user_name)
+            current_user_profile = UserProfile.objects.get(user=current_user)
+            followers = Follow.objects.filter(following=current_user_profile)
+            followings = Follow.objects.filter(follower=current_user_profile)
 
-        for user_profile in UserProfile.objects.all():
-            profile_url = None
-            if user_profile.profile:
-                profile_url = user_profile.profile.url
-            user_data.append({
-                'name': user_profile.user.username,
-                'bio': user_profile.bio,
-                'profile': profile_url,
-            })
-        print("----",follow_data)
-        return JsonResponse({'user_data': user_data, 'follow_data': follow_data})
+           
+            follow_data = {
+                'follower_profiles': [{'username': follower.follower.user.username, 'profile_url': follower.follower.profile.url} for follower in followers],
+                'following_profiles': [{'username': following.following.user.username, 'profile_url': following.following.profile.url} for following in followings]
+            }
+        except:
+            pass
+        try:
+            for user in User.objects.all():
+                try:
+                    # Retrieve associated profile for the user, if it exists
+                    user_profile = UserProfile.objects.get(user=user)
 
-    except User.DoesNotExist:
-        return JsonResponse({'error': 'Current user does not exist'}, status=400)
-    except UserProfile.DoesNotExist:
-        return JsonResponse({'error': 'User profile does not exist'}, status=400)
+                    # Extract profile information
+                    profile_url = None
+                    user_bio = None
+                    
+                    if user_profile.profile:
+                        profile_url = user_profile.profile.url
+                    
+                    if user_profile.bio:
+                        user_bio = user_profile.bio
+
+                    # Append the data to user_data list
+                    user_data.append({
+                        'name': user.username,
+                        'bio': user_bio,
+                        'profile': profile_url,
+                    })
+
+                except UserProfile.DoesNotExist:
+                    # If UserProfile does not exist for the user, only include username
+                    user_data.append({
+                        'name': user.username,
+                        'bio': None,
+                        'profile': None,
+                    })
+
+                except Exception as e:
+                    print("Error processing user:", e)
+        except:
+            pass
+        # Now user_data contains all the required information
+        print(user_data)
+        return JsonResponse({'user_data': user_data, 'follow_data':follow_data })
+    except:
+        return redirect("/")    
 
 def follow(request):
     if request.method == 'POST':
@@ -188,3 +236,51 @@ def follow(request):
         return JsonResponse({'message': message})
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def accept_decline_follow_view(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        try:
+            print("yesss")
+            username = data.get('username')
+            action = data.get('action')
+            print("yesss1")
+            # Retrieve the current user's profile
+            current_user_name = request.COOKIES.get('user')
+            current_user = User.objects.get(username=current_user_name)
+            current_user_profile = UserProfile.objects.get(user=current_user)
+            print("yesss2")
+            # Retrieve the follower's profile
+            try:
+                print("111111111111111",username)
+                followe_user = User.objects.get(username=username)
+                follower_profile = UserProfile.objects.get(user=followe_user)
+                print("22222222222",follower_profile)
+            except Exception as e:
+                print("perfect",e)      
+            # Retrieve the follow instance
+            try:    
+                follow_instance = get_object_or_404(Follow, follower=follower_profile, following=current_user_profile)
+            except Exception as e:
+                print("perfect",e)   
+            print("yesss3")
+            if action == 'accept':
+                print("yesss4")
+                # Create a new FollowAction for accepting the follow request
+                FollowAction.objects.create(follow=follow_instance, action='accept')
+                follow_instance.delete()
+            elif action == 'decline':
+                print("yesss5")
+                # Delete the follow relationship if it is declined
+                follow_instance.delete()
+            else:
+                print("yesss6")
+                return JsonResponse({'error': 'Invalid action'}, status=400)
+
+            return JsonResponse({'success': True})
+        except Http404:
+            return JsonResponse({'error': 'User or follow relationship not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)

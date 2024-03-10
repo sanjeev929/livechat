@@ -10,4 +10,5 @@ urlpatterns=[
     path("submitbio/",views.submitbio,name="submitbio"),
     path('get_user_details/', views.get_user_details, name='get_user_details'),
     path("follow/",views.follow,name="follow"),
+    path('accept-decline-follow/',views.accept_decline_follow_view, name='accept_decline_follow_view'),
 ]

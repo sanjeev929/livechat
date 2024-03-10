@@ -8,12 +8,13 @@
     <link rel="stylesheet" type="text/css" href="{% static 'css/home.css' %}">
 </head>
 <body>
+    <div id="allpages" class="allprofile-container">
     <nav>
         <ul>
             {%if profile%}
-            <li> <img id="profile-picture-preview" class="profile-preview1" src="{{profile}}" alt="Profile Picture"></li>
+            <li> <img id="profile-picture-preview1" class="profile-preview1" src="{{profile}}" alt="Profile Picture"></li>
             {%else%}
-            <li> <img id="profile-picture-preview" class="profile-preview1" src="{% static 'image/profile.png' %}" alt="Profile Picture"></li>
+            <li> <img id="profile-picture-preview1" class="profile-preview1" src="{% static 'image/profile.png' %}" alt="Profile Picture"></li>
             {%endif%}
             <li><a href="#">Home</a></li>
             <li class="dropdown">
@@ -24,7 +25,7 @@
                 </div>
             </li>
             <li class="dropdown">
-                <a href="#" onclick="showNotifications()">Notifications <div class="notificontainer"><span id="notification-count">100</span></div></a>
+                <a href="#" onclick="showNotifications()">Notifications <div class="notificontainer"><span id="notification-count"></span></div></a>
                 <div class="dropdown-content" id="notification-dropdown">
                     <!-- Notification list will be added here dynamically -->
                 </div>
@@ -75,19 +76,17 @@
             <textarea id="bio" name="bio" class="edit-textarea">{{bio}}</textarea><br>
             <!-- Profile Picture -->
             <label for="profile-picture-input" class="profile-label"><br>
-                {%if profile%}
-                <img id="profile-picture-preview" class="profile-preview" src="{{profile}}" alt="Profile Picture">
-                {%else%}
+                {% if profile %}
+                <img id="profile-picture-preview" class="profile-preview" src="{{ profile }}" alt="Profile Picture">
+                {% else %}
                 <img id="profile-picture-preview" class="profile-preview" src="{% static 'image/profile.png' %}" alt="Profile Picture">
-                {%endif%}
+                {% endif %}
             </label>
-            {%if new_path%}
-            <input type="file" id="profile-picture-input" name="profile" style="display: none;" value="{{new_path}}">
-            <canvas id="resizedCanvas" style="display: none;"></canvas>
-            {%else%}
-            <input type="file" id="profile-picture-input" name="profile" style="display: none;">
-            <canvas id="resizedCanvas" style="display: none;"></canvas>
-            {%endif%}
+            {% if new_path %}
+            <input type="file" id="profile-picture-input" name="profile" style="display: none;" value="{{ new_path }}" onchange="previewImage(event)">
+            {% else %}
+            <input type="file" id="profile-picture-input" name="profile" style="display: none;" onchange="previewImage(event)">
+            {% endif %}
             <br><br>
             
             <button type="submit" class="save-button">Save</button>
@@ -105,7 +104,7 @@
             <!-- Add more users as needed -->
         </ul>
     </div>
-    
+</div>
     <!-- JavaScript code -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
@@ -125,60 +124,85 @@
             userDetails.style.display = 'block';
         }
         function updateNotificationDetails(users) {
-                var chatUsersList = document.querySelector('.followerchat-users-list');
-                chatUsersList.innerHTML = '';
-                var totalFollowerCount = 0;
+    var chatUsersList = document.querySelector('.followerchat-users-list');
+    chatUsersList.innerHTML = '';
+    var totalFollowerCount = 0;
 
-                users.follower_profiles.forEach(profile => {
-                    var followerItem = document.createElement('li');
-                    followerItem.className = 'followerchat-user-item';
+    users.follower_profiles.forEach(profile => {
+        var followerItem = document.createElement('li');
+        followerItem.className = 'followerchat-user-item';
 
-                    var userImg = document.createElement('img');
-                    userImg.src = profile.profile_url;
-                    userImg.alt = profile.username;
-                    userImg.className = 'followerprofile-picture';
-                    followerItem.appendChild(userImg);
+        var userImg = document.createElement('img');
+        userImg.src = profile.profile_url;
+        userImg.alt = profile.username;
+        userImg.className = 'followerprofile-picture';
+        followerItem.appendChild(userImg);
 
-                    var userName = document.createElement('span');
-                    userName.className = 'followerchat-user-name';
-                    userName.textContent = profile.username;
-                    followerItem.appendChild(userName);
+        var userName = document.createElement('span');
+        userName.className = 'followerchat-user-name';
+        userName.textContent = profile.username;
+        followerItem.appendChild(userName);
 
-                    var followerButtons = document.createElement('div');
-                    followerButtons.className = 'follower-buttons';
+        var followerButtons = document.createElement('div');
+        followerButtons.className = 'follower-buttons';
 
-                    var acceptButton = document.createElement('button');
-                    acceptButton.textContent = 'Accept';
-                    acceptButton.className = 'followerchat-user-action';
-                    followerButtons.appendChild(acceptButton);
+        var acceptButton = document.createElement('button');
+        acceptButton.textContent = 'Accept';
+        acceptButton.className = 'followerchat-user-action';
+        // Add event listener for accept button
+        acceptButton.addEventListener('click', function() {
+            submitAction(profile.username, 'accept');
+        });
+        followerButtons.appendChild(acceptButton);
 
-                    var declineButton = document.createElement('button');
-                    declineButton.textContent = 'Decline';
-                    declineButton.className = 'followerchat-user-action';
-                    followerButtons.appendChild(declineButton);
+        var declineButton = document.createElement('button');
+        declineButton.textContent = 'Decline';
+        declineButton.className = 'followerchat-user-action';
+        // Add event listener for decline button
+        declineButton.addEventListener('click', function() {
+            submitAction(profile.username, 'decline');
+        });
+        followerButtons.appendChild(declineButton);
 
-                    followerItem.appendChild(followerButtons);
+        followerItem.appendChild(followerButtons);
 
-                    chatUsersList.appendChild(followerItem);
-                    totalFollowerCount++;
-                });
+        chatUsersList.appendChild(followerItem);
+        totalFollowerCount++;
+    });
 
-                document.getElementById('notification-count').textContent = totalFollowerCount;
-                var notificationDetails = document.getElementById('notification-details');
-            }
+    document.getElementById('notification-count').textContent = totalFollowerCount;
+    var notificationDetails = document.getElementById('notification-details');
+}
 
+
+function submitAction(username, action) {
+
+    var data = JSON.stringify({ username: username, action: action });
+    var csrftoken = getCookie('csrftoken');
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/accept-decline-follow/', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('X-CSRFToken', csrftoken);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            console.log(xhr.responseText);
+        }
+    };
+    xhr.send(data);
+}
 
         // Function to update chat users list
         function updateChatUsersList(users) {
             var chatUsersList = document.querySelector('.chat-users-list');
             chatUsersList.innerHTML = '';
-
             users.forEach(user => {
                 // Skip adding the current user's profile
-                if (user.follower_profiles ||user.followers_profile){
+                if (user.follower_profiles || user.followers_profile){
                     return;
                 }
+                
                 if (user.name === currentusername) {
+                    console.log(user.name,currentusername)
                     return;
                 }
                 
@@ -189,7 +213,14 @@
                 };
 
                 var userImg = document.createElement('img');
-                userImg.src = user.profile;
+                if (user.profile === null) {
+                    console.log("ok")
+                    userImg.src="{% static 'image/profile.png' %}";
+                }
+                else{
+                    userImg.src = user.profile;
+                }
+                
                 userImg.alt = user.name;
                 userImg.className = 'chat-user-img';
                 listItem.appendChild(userImg);
@@ -227,6 +258,7 @@
             success: function(response) {
                 var userData = response.user_data;
                 var followData = response.follow_data;
+                console.log(userData,followData)
                 updateChatUsersList(userData)
                 updateNotificationDetails(followData)
                 // Process userData and followData as needed
@@ -307,6 +339,36 @@
         }
         return cookieValue;
     }
+    function previewImage(event) {
+
+        const preview = document.getElementById('profile-picture-preview');
+        const file = event.target.files[0];
+        const reader = new FileReader();
+
+        reader.onloadend = function () {
+            preview.src = reader.result;
+        }
+
+        if (file) {
+            reader.readAsDataURL(file);
+        } else {
+            preview.src = "";
+        }
+    }
+    document.addEventListener('dblclick', function(event) {
+    // Close all open containers
+    var notificationProfile = document.getElementById('notification-detailsall');
+    var editProfile = document.getElementById('edit-profile');
+
+    // Check if the elements are found before trying to hide them
+    if (notificationProfile) {
+        notificationProfile.style.display = 'none';
+    }
+    if (editProfile) {
+        editProfile.style.display = 'none';
+    }
+});
+
     </script>
 </body>
 </html>
