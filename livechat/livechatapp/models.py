@@ -13,7 +13,7 @@ class Follow(models.Model):
     follower = models.ForeignKey(UserProfile, related_name='follower', on_delete=models.CASCADE)
     following = models.ForeignKey(UserProfile, related_name='following', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-
+    follow = models.CharField(max_length=255)
     class Meta:
         unique_together = ('follower', 'following')
 
@@ -22,6 +22,7 @@ class Follow(models.Model):
 
 class FollowAction(models.Model):
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
+    follow_instance = models.ForeignKey(Follow, on_delete=models.CASCADE)  # Rename to avoid conflict
     action = models.CharField(max_length=10)  # 'accept' or 'decline'
 
     def __str__(self):

@@ -4,6 +4,20 @@ from django.http import JsonResponse,Http404
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
 from . models import UserProfile,Follow,FollowAction
+from django.db import connection
+from django.db.utils import OperationalError
+import base64
+
+cursor = connection.cursor()
+def table_exists(table_name):
+    cursor.execute("""
+        SELECT EXISTS (
+            SELECT 1
+            FROM information_schema.tables
+            WHERE table_name = %s
+        )
+    """, (table_name,))
+    return cursor.fetchone()[0]
 
 def register(request):
     if request.method == 'POST':
@@ -11,32 +25,48 @@ def register(request):
         email = request.POST['email']
         password = request.POST['password']
         confirm_password = request.POST['confirm_password']
-        
         if password != confirm_password:
             return render(request, 'register.html', {'error_message': 'Passwords do not match'})
         
-        if User.objects.filter(email=email).exists():
+        cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'auth_user')")
+        table_exists = cursor.fetchone()[0]
+        if not table_exists('auth_user'):
+            cursor.execute("""
+                CREATE TABLE auth_user (
+                    id SERIAL PRIMARY KEY,
+                    username VARCHAR(150) UNIQUE,
+                    email VARCHAR(254) UNIQUE,
+                    password VARCHAR(128)
+                )
+            """)
+        cursor.execute("SELECT id FROM auth_user WHERE email = %s", [email])
+        row = cursor.fetchone()
+        if row:
             return render(request, 'register.html', {'error_message': 'Email is already registered'})
-        existing_user = User.objects.filter(username=username).exists()
-        if existing_user:
-            return render(request, 'register.html', {'error_message': 'Email is already taken'})
-        user = User.objects.create_user(email=email, username=username, password=password)
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id FROM auth_user WHERE username = %s", [username])
+            row = cursor.fetchone()
+        if row:
+            return render(request, 'register.html', {'error_message': 'Username is already taken'})
+        with connection.cursor() as cursor:
+            cursor.execute("INSERT INTO auth_user (username, email, password) VALUES (%s, %s, %s)", [username, email, password])
         return redirect('login')
-
     return render(request, 'register.html')
 
 def login(request):
     if request.method == 'POST':
         username = request.POST['username']
         password = request.POST['password']
-        state=False
-        user = authenticate(request, username=username, password=password)
+        cursor.execute("""
+        SELECT username, password
+        FROM auth_user
+        WHERE username = %s AND password = %s
+        """, (username, password))
+        user = cursor.fetchone()
+        print(user[0])
         if user is not None:
-            state=True
-            email = user.email
-            response = redirect(home)
-            response.set_cookie('state', state)
-            response.set_cookie('user', user)
+            response = redirect('home')
+            response.set_cookie('user', user[0])
             return response
         else:
             return render(request, 'login.html', {'error_message': 'Invalid username or password'})
@@ -50,64 +80,75 @@ def logout(request):
 
 def home(request):
     try:
-        state_cookie = request.COOKIES.get('state')
         user_cookie = request.COOKIES.get('user')
     except:
         return redirect(login)    
-    if state_cookie and user_cookie:
-        try:
-            user = User.objects.get(username=user_cookie)
-        except:
-            return redirect(login)
-        email = user.email
-        try:
-            user = User.objects.get(email=email)
-            user_profile = UserProfile.objects.get(user=user)
-            bio = user_profile.bio
-            profile = user_profile.profile
-            parts = str(profile).split('/')
-            # Remove the first part ('static') and the second part ('image')
-            new_path = '/'.join(parts[2:])
-
-        except:
+    if user_cookie:
+        cursor.execute("""
+            SELECT bio, profile_picture
+            FROM profile
+            WHERE username = %s
+            """, (user_cookie,))
+        row = cursor.fetchone()
+        if row:
+            bio = row[0]
+            profile_picture = row[1]
+            profile_picture = base64.b64encode(profile_picture).decode('utf-8')
+            print(profile_picture)
+        else:
             bio=None
-            new_path=None
-            profile=None
+            profile_picture=None    
         context={
-            "email":email,
+            "name":user_cookie,
             "bio":bio,
-            "new_path":new_path,
-            "profile":profile,
-            "name":user_cookie
+            "profile":profile_picture
         }
         return render(request,"home.html",context)
     else:
-        return render(request,"login.html")
+        return redirect(login)
     
 def submitbio(request):
     user_cookie = request.COOKIES.get('user')
     if request.method == 'POST':
         bio = request.POST.get('bio')
         try:
-            profile = request.FILES['profile']
+            profile_picture = request.FILES['profile']
         except: 
-            profile = 5
+            profile_picture = 5
         try:
-            user = User.objects.get(username=user_cookie)
-            email=user.email
-            user = User.objects.get(email=email)
-            user_profile, created = UserProfile.objects.get_or_create(user=user)
-            user_profile.bio = bio
-            if profile != 5:
-                user_profile.profile = profile
+            if profile_picture != 5:
+                if not table_exists('profile'):
+                    cursor.execute("""
+                        CREATE TABLE profile (
+                            id SERIAL PRIMARY KEY,
+                            username VARCHAR(150) UNIQUE,
+                            bio TEXT,
+                            profile_picture BYTEA,
+                            followers VARCHAR[],
+                            following VARCHAR[]
+                        )
+                    """)
+                    connection.commit()
+                else:
+                    profile_picture_content = profile_picture.read()
+                    # Ensure that profile_picture_content is bytes type
+                    if not isinstance(profile_picture_content, bytes):
+                        profile_picture_content = profile_picture_content.encode()
+                    cursor.execute("""
+                        INSERT INTO profile (username, bio, profile_picture)
+                        VALUES (%s, %s, %s)
+                        ON CONFLICT (username) DO UPDATE
+                        SET bio = EXCLUDED.bio,
+                            profile_picture = EXCLUDED.profile_picture
+                    """, (user_cookie, bio, profile_picture_content))
+                    connection.commit()
             else:
                 pass
-            user_profile.save()
+          
         except User.DoesNotExist:
-            # Handle the case where the user with the provided email does not exist
             pass
         except UserProfile.DoesNotExist:
-            # Handle the case where the user profile for the user does not exist
+           
             pass
         return redirect(home)
 
@@ -115,6 +156,7 @@ def submitbio(request):
 
 def get_user_details(request):
     followed_users = []
+    follow_data=[]
     user_data = []
     try:
         try:
@@ -140,12 +182,47 @@ def get_user_details(request):
             current_user_profile = UserProfile.objects.get(user=current_user)
             followers = Follow.objects.filter(following=current_user_profile)
             followings = Follow.objects.filter(follower=current_user_profile)
+            follower_profiles = []
+            profile_url=None
+            for follower in followers:
+                try:
+                    username = follower.follower.user.username
+                    try:
+                        profile_url = follower.follower.profile.url
+                    except:
+                        pass
+                    print("follower",username)
+                    profile = {
+                        'username': username,
+                        'profile_url': profile_url
+                    }
+                    follower_profiles.append(profile)
+                except Exception as e:
+                    print(f"Error fetching follower profile: {e}")
 
-           
+            following_profiles = []
+            for following in followings:
+                try:
+                    username = following.following.user.username
+                    print("following",username)
+                    try:
+                        profile_url = following.following.profile.url
+                    except:
+                        pass
+                    profile = {
+                        'username': username,
+                        'profile_url': profile_url
+                    }
+                    following_profiles.append(profile)
+                except Exception as e:
+                    print(f"Error fetching following profile: {e}")
+
+            # Construct the follow_data dictionary
             follow_data = {
-                'follower_profiles': [{'username': follower.follower.user.username, 'profile_url': follower.follower.profile.url} for follower in followers],
-                'following_profiles': [{'username': following.following.user.username, 'profile_url': following.following.profile.url} for following in followings]
+                'follower_profiles': follower_profiles,
+                'following_profiles': following_profiles
             }
+
         except:
             pass
         try:
@@ -183,10 +260,10 @@ def get_user_details(request):
                     print("Error processing user:", e)
         except:
             pass
-        # Now user_data contains all the required information
-        print(user_data)
+        print(user_data,follow_data)
         return JsonResponse({'user_data': user_data, 'follow_data':follow_data })
-    except:
+    except Exception as e:
+        print(e)
         return redirect("/")    
 
 def follow(request):
@@ -194,7 +271,6 @@ def follow(request):
         data = json.loads(request.body)
         account_name = data.get('accountName')
         follow_value = data.get('followResponse')
-        print("===========", follow_value)
         current_user_name = request.COOKIES.get('user')
         try:
             current_user = User.objects.get(username=current_user_name)
@@ -204,21 +280,27 @@ def follow(request):
             user_to_follow = User.objects.get(username=account_name)
         except User.DoesNotExist:
             return JsonResponse({'error': 'User to follow does not exist'}, status=400)
+        
         try:
-            current_user_profile = UserProfile.objects.get(user=current_user)
-            user_to_follow_profile = UserProfile.objects.get(user=user_to_follow)
-            print(current_user_profile,user_to_follow_profile)
+            print("===========", follow_value,current_user,user_to_follow)
+            try:
+                current_user_profile = UserProfile.objects.get(user=current_user)
+                user_to_follow_profile = UserProfile.objects.get(user=user_to_follow)
+            except Exception as e:
+                print(e)    
+            print("===========", current_user_profile)
+            print(current_user_profile,user_to_follow_profile,user_to_follow_profile)
         except UserProfile.DoesNotExist:
             return JsonResponse({'error': 'User profile does not exist'}, status=400)
-
-        if follow_value == 'Follow':
+        if follow_value == "Follow":
             follow_instance, created = Follow.objects.get_or_create(
                 follower=current_user_profile,
                 following=user_to_follow_profile
             )
-            follow_instance.follow_value = follow_value
+            follow_instance.follow = follow_value
             follow_instance.save()
             if created:
+                print("ok created")
                 message = f'Now following {account_name}.'
             else:
                 message = f'Follow relationship updated for {account_name}.'
@@ -257,7 +339,7 @@ def accept_decline_follow_view(request):
                 follower_profile = UserProfile.objects.get(user=followe_user)
                 print("22222222222",follower_profile)
             except Exception as e:
-                print("perfect",e)      
+                print("perfecttt",e)      
             # Retrieve the follow instance
             try:    
                 follow_instance = get_object_or_404(Follow, follower=follower_profile, following=current_user_profile)
@@ -267,10 +349,14 @@ def accept_decline_follow_view(request):
             if action == 'accept':
                 print("yesss4")
                 # Create a new FollowAction for accepting the follow request
-                FollowAction.objects.create(follow=follow_instance, action='accept')
+                try:
+                    FollowAction.objects.create(user_profile=current_user_profile,follow=follow_instance, action='accept')
+                except Exception as e:
+                    print("ssd",e)    
+                print("yess5")
                 follow_instance.delete()
             elif action == 'decline':
-                print("yesss5")
+                print("yesss55")
                 # Delete the follow relationship if it is declined
                 follow_instance.delete()
             else:

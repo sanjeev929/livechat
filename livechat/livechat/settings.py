@@ -76,8 +76,12 @@ WSGI_APPLICATION = 'livechat.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'socialmedia',
+        'USER': 'postgres',
+        'PASSWORD': '123',
+        'HOST': 'localhost',   # Or your database host
+        'PORT': '5432',        # Or your database port
     }
 }
 
