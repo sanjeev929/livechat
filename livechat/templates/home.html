@@ -370,13 +370,17 @@ function submitAction(username, action) {
     // Close all open containers
     var notificationProfile = document.getElementById('notification-detailsall');
     var editProfile = document.getElementById('edit-profile');
-
+    var userdetails = document.getElementById('user-details');
+    
     // Check if the elements are found before trying to hide them
     if (notificationProfile) {
         notificationProfile.style.display = 'none';
     }
     if (editProfile) {
         editProfile.style.display = 'none';
+    }
+    if (userdetails) {
+        userdetails.style.display = 'none';
     }
 });
 
