@@ -87,11 +87,11 @@
 
     <div id="chat-users" class="chat-users-container">
         <!-- Chat users list -->
-        <h2 class="chat-users-heading">Chat Users</h2>
+        <h2 class="chat-users-heading">Suggestions</h2>
         <ul class="chat-users-list">
             <li onclick="showUserProfile('User1')" class="chat-user-item">
                 <img src="{% static 'image/profile.png' %}" alt="User1" class="chat-user-img">
-                <span class="chat-user-name">User1</span>
+                <span class="chat-user-name">Loading</span>
             </li>
             <!-- Add more users as needed -->
         </ul>
@@ -112,6 +112,7 @@
             // Set user details and show the section
             userNameElement.textContent = userName;
             userBioElement.textContent = userBio;
+            console.log(userProfile)
             profilePicture.src = userProfile;
             userDetails.style.display = 'block';
         }
@@ -129,7 +130,7 @@
                     userImg.src ="{% static 'image/profile.png' %}";
                 }
                 else{
-                    userImg.src =profile.profile_url;
+                    userImg.src = "data:image;base64," +profile.profile_url;
                 }
                 
                 userImg.alt = profile.username;
@@ -169,7 +170,6 @@
             });
 
             document.getElementById('notification-count').textContent = totalFollowerCount;
-            console.log(totalFollowerCount)
             
         }
 
@@ -206,23 +206,26 @@ function submitAction(username, action) {
                 }
                 
                 if (user.name === currentusername) {
-                    console.log(user.name,currentusername)
                     return;
                 }
                 
                 var listItem = document.createElement('li');
                 listItem.className = 'chat-user-item';
                 listItem.onclick = function() {
-                    showUserProfile(user.name, user.bio, user.profile);
+                    if (user.profile === "Not") {
+                        showUserProfile(user.name, user.bio, "{% static 'image/profile.png' %}");
+                    }
+                    else{
+                        showUserProfile(user.name, user.bio,  "data:image;base64,"+user.profile);
+                    }
                 };
-
                 var userImg = document.createElement('img');
-                if (user.profile === null) {
-                    console.log("ok")
+                console.log(user.profile)
+                if (user.profile === "Not") {
                     userImg.src="{% static 'image/profile.png' %}";
                 }
                 else{
-                    userImg.src = user.profile;
+                    userImg.src = "data:image;base64," + user.profile;
                 }
                 
                 userImg.alt = user.name;
@@ -267,7 +270,6 @@ function submitAction(username, action) {
             success: function(response) {
                 var userData = response.user_data;
                 var followData = response.follow_data;
-                console.log(userData,followData)
                 updateChatUsersList(userData)
                 updateNotificationDetails(followData)
                 // Process userData and followData as needed

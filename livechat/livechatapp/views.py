@@ -27,30 +27,32 @@ def register(request):
         confirm_password = request.POST['confirm_password']
         if password != confirm_password:
             return render(request, 'register.html', {'error_message': 'Passwords do not match'})
-        
-        cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'auth_user')")
-        table_exists = cursor.fetchone()[0]
-        if not table_exists('auth_user'):
-            cursor.execute("""
-                CREATE TABLE auth_user (
-                    id SERIAL PRIMARY KEY,
-                    username VARCHAR(150) UNIQUE,
-                    email VARCHAR(254) UNIQUE,
-                    password VARCHAR(128)
-                )
-            """)
-        cursor.execute("SELECT id FROM auth_user WHERE email = %s", [email])
-        row = cursor.fetchone()
-        if row:
-            return render(request, 'register.html', {'error_message': 'Email is already registered'})
         with connection.cursor() as cursor:
-            cursor.execute("SELECT id FROM auth_user WHERE username = %s", [username])
+            cursor.execute("SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'auth_user')")
+
+           
+            if not table_exists('auth_user'):
+                cursor.execute("""
+                    CREATE TABLE auth_user (
+                        id SERIAL PRIMARY KEY,
+                        username VARCHAR(150) UNIQUE,
+                        email VARCHAR(254) UNIQUE,
+                        password VARCHAR(128)
+                    )
+                """)
+            cursor.execute("SELECT id FROM auth_user WHERE email = %s", [email])
             row = cursor.fetchone()
-        if row:
-            return render(request, 'register.html', {'error_message': 'Username is already taken'})
-        with connection.cursor() as cursor:
-            cursor.execute("INSERT INTO auth_user (username, email, password) VALUES (%s, %s, %s)", [username, email, password])
-        return redirect('login')
+            if row:
+                return render(request, 'register.html', {'error_message': 'Email is already registered'})
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT id FROM auth_user WHERE username = %s", [username])
+                row = cursor.fetchone()
+            if row:
+                return render(request, 'register.html', {'error_message': 'Username is already taken'})
+            with connection.cursor() as cursor:
+                cursor.execute("INSERT INTO auth_user (username, email, password) VALUES (%s, %s, %s)", [username, email, password])
+            
+            return redirect('login')
     return render(request, 'register.html')
 
 def login(request):
@@ -161,7 +163,7 @@ def get_user_details(request):
     try:
         try:
             current_user_name = request.COOKIES.get('user')
-            print(current_user_name)
+            print("user",current_user_name)
             current_user = User.objects.get(username=current_user_name)
             current_user_profile = UserProfile.objects.get(user=current_user)
             follows = Follow.objects.filter(follower=current_user_profile)
@@ -226,41 +228,59 @@ def get_user_details(request):
         except:
             pass
         try:
-            for user in User.objects.all():
+            # cursor.execute("""
+            #         SELECT auth_user.username, profile.bio, profile.profile_picture
+            #         FROM auth_user
+            #         INNER JOIN profile ON auth_user.username = profile.username
+            #     """)
+            # results = cursor.fetchall()
+
+            # for row in results:
+            #     name, bio, profile_picture = row
+            #     print("=========================",name,bio,profile_picture)
+            #     user_data = {
+            #     'name': name,
+            #     'bio': bio,
+            #     'prfile':profile_picture
+            # }
+            cursor.execute("""
+                SELECT 
+                    auth_user.username, 
+                    COALESCE(profile.bio, 'Not') AS bio, 
+                    CASE 
+                        WHEN profile.profile_picture IS NULL THEN 'Not' 
+                        ELSE encode(profile.profile_picture, 'base64') 
+                    END AS profile_picture
+                FROM 
+                    auth_user
+                LEFT JOIN 
+                    profile ON auth_user.username = profile.username
+            """)
+            results = cursor.fetchall()
+            for row in results:
+                name, bio, profile_picture = row
+                print(name,profile_picture)
                 try:
-                    # Retrieve associated profile for the user, if it exists
-                    user_profile = UserProfile.objects.get(user=user)
+                    # Convert profile_picture to a suitable format for serialization
+                    if isinstance(profile_picture, memoryview):
+                        profile_picture = profile_picture.tobytes()  # Convert memoryview to bytes
 
-                    # Extract profile information
-                    profile_url = None
-                    user_bio = None
-                    
-                    if user_profile.profile:
-                        profile_url = user_profile.profile.url
-                    
-                    if user_profile.bio:
-                        user_bio = user_profile.bio
-
-                    # Append the data to user_data list
+                    # Append the row to the list after ensuring that all fields are serializable
                     user_data.append({
-                        'name': user.username,
-                        'bio': user_bio,
-                        'profile': profile_url,
+                        'name': name,
+                        'bio': bio,
+                        'profile':base64.b64encode(profile_picture).decode('utf-8')
                     })
-
-                except UserProfile.DoesNotExist:
-                    # If UserProfile does not exist for the user, only include username
+                    print("ok")
+                except:
                     user_data.append({
-                        'name': user.username,
-                        'bio': None,
-                        'profile': None,
-                    })
+                        'name': name,
+                        'bio': bio,
+                        'profile':profile_picture
+                    })   
 
-                except Exception as e:
-                    print("Error processing user:", e)
-        except:
+        except Exception as e:
             pass
-        print(user_data,follow_data)
         return JsonResponse({'user_data': user_data, 'follow_data':follow_data })
     except Exception as e:
         print(e)
