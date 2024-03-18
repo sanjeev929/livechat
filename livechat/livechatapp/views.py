@@ -232,7 +232,21 @@ def get_user_details(request):
                     LEFT JOIN 
                         profile ON auth_user.username = profile.username
                 """)
+               
                 results = cursor.fetchall()
+                cursor.execute("""
+                SELECT 
+                    profile.followingrequest
+                FROM 
+                    auth_user
+                LEFT JOIN 
+                    profile ON auth_user.username = profile.username
+                WHERE 
+                    auth_user.username = profile.username;
+                               """)
+                results1 = cursor.fetchall()
+                for name in results1[0]:
+                    print(name)
                 for row in results:
                     name, bio, profile_picture = row
                     try:
@@ -281,17 +295,16 @@ def follow1(current_user_name,follow_value,account_name):
             except:
                 pass
            
-            print(existing_following_requests)
             if existing_following_requests is None:
                 existing_following_requests = []
             existing_following_requests.append(account_name)
             print(existing_following_requests)
             existing_following_requests=list(set(existing_following_requests))
             cursor.execute("""
-                INSERT INTO profile (username, followersrequest)
+                INSERT INTO profile (username, followingrequest)
                 VALUES (%s, %s)
                 ON CONFLICT (username)
-                DO UPDATE SET followersrequest = %s
+                DO UPDATE SET followingrequest = %s
             """, (current_user_name, existing_following_requests, existing_following_requests))
             connection.commit()
 
@@ -306,8 +319,7 @@ def follow1(current_user_name,follow_value,account_name):
                 existing_follow_requests = cursor.fetchone()[0]
             except:
                 pass
-           
-            print(existing_follow_requests)
+    
             if existing_follow_requests is None:
                 existing_follow_requests = []
             existing_follow_requests.append(current_user_name)
@@ -329,13 +341,10 @@ def follow(request):
         current_user_name = request.COOKIES.get('user')
         print(current_user_name,follow_value,account_name)
         if not table_exists('profile'):
-            print("check========")
             profile_table()
             follow1(current_user_name,follow_value,account_name)
-            print("first")
         else:
             follow1(current_user_name,follow_value,account_name)
-            print("second")
         message='OK'
 
         return JsonResponse({'message': message})
