@@ -102,13 +102,21 @@
 
     <script>
         var currentusername="{{name}}"
-        function showUserProfile(userName, userBio, userProfile) {
+        function showUserProfile(userName, userBio, userProfile,followbtn) {
             var userDetails = document.getElementById('user-details');
             var userNameElement = document.getElementById('user-name');
             var userBioElement = document.getElementById('user-bio');
             var profilePicture = document.getElementById('profile-picture');
             var followButton = document.getElementById('follow-button');
-
+            var unfollowButton = document.getElementById('unfollow-button');
+            if (followbtn) {
+                followButton.style.display = 'block'; 
+                unfollowButton.style.display = 'none'; 
+            }
+            else{
+                followButton.style.display = 'none'; 
+                unfollowButton.style.display = 'block'; 
+            }
             // Set user details and show the section
             userNameElement.textContent = userName;
             userBioElement.textContent = userBio;
@@ -116,62 +124,62 @@
             profilePicture.src = userProfile;
             userDetails.style.display = 'block';
         }
-        function updateNotificationDetails(users) {
-            var chatUsersList = document.querySelector('.followerchat-users-list');
-            chatUsersList.innerHTML = '';
-            var totalFollowerCount = 0;
+        // function updateNotificationDetails(users) {
+        //     var chatUsersList = document.querySelector('.followerchat-users-list');
+        //     chatUsersList.innerHTML = '';
+        //     var totalFollowerCount = 0;
 
-            users.follower_profiles.forEach(profile => {
-                var followerItem = document.createElement('li');
-                followerItem.className = 'followerchat-user-item';
+        //     users.follower_profiles.forEach(profile => {
+        //         var followerItem = document.createElement('li');
+        //         followerItem.className = 'followerchat-user-item';
 
-                var userImg = document.createElement('img');
-                if(profile.profile_url===null){
-                    userImg.src ="{% static 'image/profile.png' %}";
-                }
-                else{
-                    userImg.src = "data:image;base64," +profile.profile_url;
-                }
+        //         var userImg = document.createElement('img');
+        //         if(profile.profile_url===null){
+        //             userImg.src ="{% static 'image/profile.png' %}";
+        //         }
+        //         else{
+        //             userImg.src = "data:image;base64," +profile.profile_url;
+        //         }
                 
-                userImg.alt = profile.username;
-                userImg.className = 'followerprofile-picture';
-                followerItem.appendChild(userImg);
+        //         userImg.alt = profile.username;
+        //         userImg.className = 'followerprofile-picture';
+        //         followerItem.appendChild(userImg);
 
-                var userName = document.createElement('span');
-                userName.className = 'followerchat-user-name';
-                userName.textContent = profile.username;
-                followerItem.appendChild(userName);
+        //         var userName = document.createElement('span');
+        //         userName.className = 'followerchat-user-name';
+        //         userName.textContent = profile.username;
+        //         followerItem.appendChild(userName);
 
-                var followerButtons = document.createElement('div');
-                followerButtons.className = 'follower-buttons';
+        //         var followerButtons = document.createElement('div');
+        //         followerButtons.className = 'follower-buttons';
 
-                var acceptButton = document.createElement('button');
-                acceptButton.textContent = 'Accept';
-                acceptButton.className = 'followerchat-user-action';
-                // Add event listener for accept button
-                acceptButton.addEventListener('click', function() {
-                    submitAction(profile.username, 'accept');
-                });
-                followerButtons.appendChild(acceptButton);
+        //         var acceptButton = document.createElement('button');
+        //         acceptButton.textContent = 'Accept';
+        //         acceptButton.className = 'followerchat-user-action';
+        //         // Add event listener for accept button
+        //         acceptButton.addEventListener('click', function() {
+        //             submitAction(profile.username, 'accept');
+        //         });
+        //         followerButtons.appendChild(acceptButton);
 
-                var declineButton = document.createElement('button');
-                declineButton.textContent = 'Decline';
-                declineButton.className = 'followerchat-user-action';
-                // Add event listener for decline button
-                declineButton.addEventListener('click', function() {
-                    submitAction(profile.username, 'decline');
-                });
-                followerButtons.appendChild(declineButton);
+        //         var declineButton = document.createElement('button');
+        //         declineButton.textContent = 'Decline';
+        //         declineButton.className = 'followerchat-user-action';
+        //         // Add event listener for decline button
+        //         declineButton.addEventListener('click', function() {
+        //             submitAction(profile.username, 'decline');
+        //         });
+        //         followerButtons.appendChild(declineButton);
 
-                followerItem.appendChild(followerButtons);
+        //         followerItem.appendChild(followerButtons);
 
-                chatUsersList.appendChild(followerItem);
-                totalFollowerCount++;
-            });
+        //         chatUsersList.appendChild(followerItem);
+        //         totalFollowerCount++;
+        //     });
 
-            document.getElementById('notification-count').textContent = totalFollowerCount;
+        //     document.getElementById('notification-count').textContent = totalFollowerCount;
             
-        }
+        // }
 
 window.onload = function() {
         var userNameElement = document.querySelector('.followerchat-user-name');
@@ -201,6 +209,7 @@ function submitAction(username, action) {
             chatUsersList.innerHTML = '';
             users.forEach(user => {
                 // Skip adding the current user's profile
+                console.log(users)
                 if (user.follower_profiles || user.followers_profile){
                     return;
                 }
@@ -211,12 +220,15 @@ function submitAction(username, action) {
                 
                 var listItem = document.createElement('li');
                 listItem.className = 'chat-user-item';
+                console.log(user.bio,"================")
                 listItem.onclick = function() {
                     if (user.profile === "Not") {
-                        showUserProfile(user.name, user.bio, "{% static 'image/profile.png' %}");
+                        console.log(user.bio,"================")
+                        showUserProfile(user.name, user.bio, "{% static 'image/profile.png' %}",user.followbtn);
                     }
                     else{
-                        showUserProfile(user.name, user.bio,  "data:image;base64,"+user.profile);
+                        console.log(user.bio,"================")
+                        showUserProfile(user.name, user.bio,  "data:image;base64,"+user.profile,user.followbtn);
                     }
                 };
                 var userImg = document.createElement('img');
@@ -271,7 +283,7 @@ function submitAction(username, action) {
                 var userData = response.user_data;
                 var followData = response.follow_data;
                 updateChatUsersList(userData)
-                updateNotificationDetails(followData)
+                // updateNotificationDetails(followData)
                 // Process userData and followData as needed
             },
             error: function(xhr, status, error) {

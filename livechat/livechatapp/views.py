@@ -27,8 +27,7 @@ def profile_table():
                             profile_picture BYTEA,
                             followersrequest VARCHAR[],
                             followingrequest VARCHAR[],      
-                            followers VARCHAR[],
-                            following VARCHAR[]
+                            freinds  VARCHAR[]
                         )
                     """)
     connection.commit()
@@ -110,18 +109,30 @@ def home(request):
                 bio = row[0]
                 profile_picture = row[1]
                 profile_picture = base64.b64encode(profile_picture).decode('utf-8')
-            else:
-                bio=None
-                profile_picture=None    
+            elif row:
+                bio=row[0]
+                profile_picture=None
             context={
-                "name":user_cookie,
-                "bio":bio,
-                "profile":profile_picture
-            }
+            "name":user_cookie,
+            "bio":bio,
+            "profile":profile_picture
+        }  
             return render(request,"home.html",context)
         except:
-            bio=None
-            profile_picture=None    
+            try:
+                cursor.execute("""
+                    SELECT bio
+                    FROM profile
+                    WHERE username = %s
+                    """, (user_cookie,))
+                row = cursor.fetchone()
+                if row:
+                    bio=row[0]
+                    profile_picture=None
+                return render(request,"home.html",context)
+            except:
+                bio=None
+                profile_picture=None
             context={
                 "name":user_cookie,
                 "bio":bio,
@@ -155,6 +166,7 @@ def submitbio(request):
                     """, (user_cookie, bio, profile_picture_content))
                     connection.commit()
                 else:
+                    print(bio,profile_picture)
                     profile_picture_content = profile_picture.read()
                     if not isinstance(profile_picture_content, bytes):
                         profile_picture_content = profile_picture_content.encode()
@@ -167,7 +179,23 @@ def submitbio(request):
                     """, (user_cookie, bio, profile_picture_content))
                     connection.commit()
             else:
-                pass
+                if not table_exists('profile'):
+                    profile_table()
+                    cursor.execute("""
+                        INSERT INTO profile (username, bio)
+                        VALUES (%s, %s)
+                        ON CONFLICT (username) DO UPDATE
+                        SET bio = EXCLUDED.bio
+                    """, (user_cookie, bio))
+                    connection.commit()
+                else:
+                    cursor.execute("""
+                        INSERT INTO profile (username, bio)
+                        VALUES (%s, %s)
+                        ON CONFLICT (username) DO UPDATE
+                        SET bio = EXCLUDED.bio
+                    """, (user_cookie, bio))
+                    connection.commit()
           
         except User.DoesNotExist:
             pass
@@ -182,6 +210,7 @@ def get_user_details(request):
     followed_users = []
     follow_data=[]
     user_data = []
+    followbtn=True
     try:
         try:
             current_user_name = request.COOKIES.get('user')
@@ -245,36 +274,76 @@ def get_user_details(request):
                     auth_user.username = profile.username;
                                """)
                 results1 = cursor.fetchall()
-                for name in results1[0]:
-                    print(name)
+                
                 for row in results:
                     name, bio, profile_picture = row
+                    for data in results1:
+                        if data[0] is not None:
+                            if name in data[0]:
+                                followbtn=False
+                            else:
+                                followbtn=True   
+                    print(name,followbtn)                  
                     try:
                         if isinstance(profile_picture, memoryview):
                             profile_picture = profile_picture.tobytes()
-
                         user_data.append({
                             'name': name,
                             'bio': bio,
-                            'profile':base64.b64encode(profile_picture).decode('utf-8')
+                            'profile':base64.b64encode(profile_picture).decode('utf-8'),
+                            'followbtn':followbtn
                         })
                     except:
                         user_data.append({
                             'name': name,
                             'bio': bio,
-                            'profile':profile_picture
+                            'profile':profile_picture,
+                            'followbtn':followbtn
                         })   
             except:
-                cursor.execute("""
-                SELECT username FROM auth_user""")
-                results = cursor.fetchall()
-                for row in results:
-                    name = row[0]
-                    user_data.append({
-                                'name': name,
-                                'bio': "Not",
-                                'profile':"Not"
-                            })
+                try:
+                    print("inside")
+                    cursor.execute("""
+                    SELECT username FROM auth_user""")
+                    results = cursor.fetchall()
+                    cursor.execute("""
+                    SELECT 
+                        profile.followingrequest
+                    FROM 
+                        auth_user
+                    LEFT JOIN 
+                        profile ON auth_user.username = profile.username
+                    WHERE 
+                        auth_user.username = profile.username;
+                                """)
+                    results1 = cursor.fetchall()
+                    for row in results:
+                        name = row[0]
+                        for data in results1:
+                            print(data[0])
+                            if data[0] is not None:
+                                if name in data[0]:
+                                    followbtn=False
+                                else:
+                                    followbtn=True        
+                        user_data.append({
+                                    'name': name,
+                                    'bio': "None",
+                                    'profile':"Not",
+                                    'followbtn':followbtn
+                                })
+                except:
+                    cursor.execute("""
+                    SELECT username FROM auth_user""")
+                    results = cursor.fetchall()
+                    for row in results:
+                        name = row[0]   
+                        user_data.append({
+                                    'name': name,
+                                    'bio': "None",
+                                    'profile':"Not",
+                                    'followbtn':followbtn      
+                                })
         except Exception as e:
             pass
         return JsonResponse({'user_data': user_data, 'follow_data':follow_data })
@@ -298,7 +367,6 @@ def follow1(current_user_name,follow_value,account_name):
             if existing_following_requests is None:
                 existing_following_requests = []
             existing_following_requests.append(account_name)
-            print(existing_following_requests)
             existing_following_requests=list(set(existing_following_requests))
             cursor.execute("""
                 INSERT INTO profile (username, followingrequest)
@@ -323,7 +391,6 @@ def follow1(current_user_name,follow_value,account_name):
             if existing_follow_requests is None:
                 existing_follow_requests = []
             existing_follow_requests.append(current_user_name)
-            print(existing_follow_requests)
             existing_follow_requests=list(set(existing_follow_requests))
             cursor.execute("""
                 INSERT INTO profile (username, followersrequest)
@@ -339,12 +406,25 @@ def follow(request):
         account_name = data.get('accountName')
         follow_value = data.get('followResponse')
         current_user_name = request.COOKIES.get('user')
-        print(current_user_name,follow_value,account_name)
-        if not table_exists('profile'):
-            profile_table()
-            follow1(current_user_name,follow_value,account_name)
+        if follow_value == 'Follow':
+            if not table_exists('profile'):
+                profile_table()
+                follow1(current_user_name,follow_value,account_name)
+            else:
+                follow1(current_user_name,follow_value,account_name)
+        elif follow_value == 'Un Follow':
+            cursor.execute("""
+                    SELECT followersrequest
+                    FROM profile
+                    WHERE username = %s
+                """, (account_name,))
+            existing_follow_requests = cursor.fetchone()[0]
+            if existing_follow_requests is None:
+                existing_follow_requests = []
+                existing_follow_requests.remove(current_user_name)
+
         else:
-            follow1(current_user_name,follow_value,account_name)
+            pass
         message='OK'
 
         return JsonResponse({'message': message})
