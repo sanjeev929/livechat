@@ -14,7 +14,7 @@ body, h1, h2, h3, h4, h5, h6, p, ul, ol, li, figure, figcaption, blockquote, dl,
 /* Body styles */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    background-color: #dbdbdb;
     color: #333;
     line-height: 1.6;
 }
@@ -130,7 +130,7 @@ nav ul li a:hover {
 }
 /* User details profile */
 .user-details-container {
-    width: 200px;
+    width: 300px;
     height: 300px;
     display: none;
     padding: 20px;
@@ -142,8 +142,7 @@ nav ul li a:hover {
 }
 .user-details-container h2 {
     margin-top: 0;
-    margin-left: 25px;
-    margin-left: 30px;
+    margin-left: 75px;
 
 }
 .user-details-container img {
@@ -151,34 +150,90 @@ nav ul li a:hover {
     height: 100px;
     border-radius: 50%;
     margin-bottom: 10px;
-    margin-left: 25px;
+    margin-left: 75px;
 }
-.user-details-container p,button{
-    margin-left: 30px;
+.user-details-container p{
+    margin-left: 75px;
 }
-
 
 .chat-users-container {
     width: 800px; /* Adjust width as needed */
-    height: 300px; /* Adjust height as needed */
-    margin: 0em;
-    overflow-y: auto;
-    border-radius: 1px solid;
+    height: 1500px; /* Adjust height as needed */
+    position: relative; /* Make the container a reference for positioning */
+  }
+  
+  .chat-users-heading {
+    font-size:large;
+    position: absolute; /* Position the heading absolutely */
+    top: 30px; /* Adjust from the top */
+    left: 70px; /* Adjust from the left */
   }
   
   .chat-users-list {
-    overflow-x: auto;
+    background-color: #f9f9f9;
     white-space: nowrap; /* Prevent wrapping of list items */
+    overflow: auto; /* Add scrollbar */
     direction: ltr; /* Reset direction to left-to-right */
+    position: absolute; /* Position the list container absolutely */
+    top: 90px; /* Adjust from the top */
+    left: 70px; /* Adjust from the left */
+    border: 2px solid #61616116; /* Add border */
+    border-radius: 20px;
+    width: 400px; /* Adjust width as needed */
+    height: 150px; /* Adjust height as needed */
+    
+    /* Center content horizontally and vertically */
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .chat-user-item {
-    display: inline-block; /* Display list items in a row */
-    margin-right: 50px !important; /* Adjust spacing between items */
-    box-sizing: border-box;
+    display: flex; /* Use flexbox to align items vertically */
+    flex-direction: column; /* Stack items vertically */
+    align-items: center; /* Center items horizontally */
+    margin-left: 45px;
+  }
+  
+  .chat-user-img {
+    margin-bottom: 5px; /* Adjust spacing between image and username */
+  }
+  
+  .chat-user-name {
+    margin-top: auto; /* Push the username to the bottom */
+    margin-left: 10px;
   }
 
 
+/* Hide the default scrollbar */
+.chat-users-list::-webkit-scrollbar {
+    width: 12px; /* Set the width of the scrollbar */
+    height: 12px; /* Set the height of the scrollbar */
+  }
+  
+  /* Track */
+  .chat-users-list::-webkit-scrollbar-track {
+    background: #f1f1f1; /* Set the background color of the scrollbar track */
+  }
+  
+  /* Handle */
+  .chat-users-list::-webkit-scrollbar-thumb {
+    background: #888; /* Set the color of the scrollbar handle */
+    border-radius: 25px; /* Make the scrollbar handle round */
+    border: none; /* Remove border */
+  }
+  
+  /* Handle on hover */
+  .chat-users-list::-webkit-scrollbar-thumb:hover {
+    background: #555; /* Change the color of the scrollbar handle on hover */
+  }
+  
+  /* Slide bar effect */
+  .chat-users-list:hover::-webkit-scrollbar-thumb {
+    transition: background-color 0.3s ease; /* Add transition effect */
+  }
+  
+  
 .notification-container {
     position: fixed;
     top: 50%;
@@ -236,34 +291,6 @@ nav ul li a:hover {
 }
 
 
-
-
-/* Chat users list */
-.chat-users-list {
-    width: 20%; /* Adjust width as needed */
-    max-width: 600px; /* Maximum width of the container */
-    height: 100px; /* Adjust height as needed */
-    display: flex;
-    overflow-x: auto; /* Enable horizontal scrolling */
-    -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */
-    scrollbar-width: none; /* Hide scrollbar for non-Firefox browsers */
-    -ms-overflow-style: none; /* Hide scrollbar for Internet Explorer and Edge */
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.chat-user-item {
-    flex: 0 0 auto;
-    margin-right: 10px;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
 .chat-user-item:last-child {
     margin-right: 0;
 }
@@ -313,6 +340,7 @@ nav ul li a:hover {
 
 /* Button styles */
 button {
+    width: 100%;
     display: inline-block;
     padding: 10px 20px;
     background-color: #333;
@@ -327,6 +355,21 @@ button:hover {
     background-color: #555;
 }
 
+input[type="submit"]{
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 16px;
+    background-color: #333;
+    color: #fff;
+    transition: border-color 0.3s ease;
+}
+input[type="submit"]:hover{
+    background-color: #555;
+}
 /* Input styles */
 input[type="text"],
 input[type="email"],
@@ -334,7 +377,7 @@ input[type="password"],
 input[type="number"],
 input[type="date"],
 input[type="file"],
-input[type="submit"],
+
 textarea {
     width: 100%;
     padding: 10px;

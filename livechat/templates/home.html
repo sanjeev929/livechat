@@ -80,21 +80,22 @@
             <input type="file" id="profile-picture-input" name="profile" style="display: none;" onchange="previewImage(event)">
             {% endif %}
             <br><br>
-            
-            <button type="submit" class="save-button">Save</button>
+            <input type="submit">
         </form>
     </div>
 
     <div id="chat-users" class="chat-users-container">
         <!-- Chat users list -->
-        <h2 class="chat-users-heading">Suggestions</h2>
-        <ul id="user-list" class="chat-users-list">
-            <li onclick="showUserProfile('User1')" class="chat-user-item">
-                <img src="{% static 'image/profile.png' %}" alt="User1" class="chat-user-img">
-                <span class="chat-user-name">Loading</span>
-            </li>
-            <!-- Add more users as needed -->
-        </ul>
+        <h2 class="chat-users-heading">Suggested for you</h2>
+        <div class="chat-all-userlist">
+            <ul id="user-list" class="chat-users-list">
+                <li onclick="showUserProfile('User1')" class="chat-user-item">
+                    <img src="{% static 'image/profile.png' %}" alt="User1" class="chat-user-img">
+                    <span class="chat-user-name">Loading</span>
+                </li>
+                <!-- Add more users as needed -->
+            </ul>
+        </div>
     </div>
 </div>
     <!-- JavaScript code -->
@@ -392,34 +393,6 @@ function submitAction(username, action) {
         userdetails.style.display = 'none';
     }
 });
-
-const userList = document.getElementById('user-list');
-let isMouseDown = false;
-let startX;
-let scrollLeft;
-
-userList.addEventListener('mousedown', (e) => {
-  isMouseDown = true;
-  startX = e.pageX - userList.offsetLeft;
-  scrollLeft = userList.scrollLeft;
-});
-
-userList.addEventListener('mouseleave', () => {
-  isMouseDown = false;
-});
-
-userList.addEventListener('mouseup', () => {
-  isMouseDown = false;
-});
-
-userList.addEventListener('mousemove', (e) => {
-  if (!isMouseDown) return;
-  e.preventDefault();
-  const x = e.pageX - userList.offsetLeft;
-  const walk = (x - startX) * 3; // Adjust scroll speed
-  userList.scrollLeft = scrollLeft - walk;
-});
-
     </script>
 </body>
 </html>
