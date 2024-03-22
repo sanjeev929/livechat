@@ -88,7 +88,7 @@
     <div id="chat-users" class="chat-users-container">
         <!-- Chat users list -->
         <h2 class="chat-users-heading">Suggestions</h2>
-        <ul class="chat-users-list">
+        <ul id="user-list" class="chat-users-list">
             <li onclick="showUserProfile('User1')" class="chat-user-item">
                 <img src="{% static 'image/profile.png' %}" alt="User1" class="chat-user-img">
                 <span class="chat-user-name">Loading</span>
@@ -120,73 +120,75 @@
             // Set user details and show the section
             userNameElement.textContent = userName;
             userBioElement.textContent = userBio;
-            console.log(userProfile)
             profilePicture.src = userProfile;
             userDetails.style.display = 'block';
         }
-        // function updateNotificationDetails(users) {
-        //     var chatUsersList = document.querySelector('.followerchat-users-list');
-        //     chatUsersList.innerHTML = '';
-        //     var totalFollowerCount = 0;
+        function updateNotificationDetails(users) {
+            var chatUsersList = document.querySelector('.followerchat-users-list');
+            chatUsersList.innerHTML = '';
+            var totalFollowerCount = 0;
+            console.log("==========",users)
+            users.forEach(profile => {
 
-        //     users.follower_profiles.forEach(profile => {
-        //         var followerItem = document.createElement('li');
-        //         followerItem.className = 'followerchat-user-item';
-
-        //         var userImg = document.createElement('img');
-        //         if(profile.profile_url===null){
-        //             userImg.src ="{% static 'image/profile.png' %}";
-        //         }
-        //         else{
-        //             userImg.src = "data:image;base64," +profile.profile_url;
-        //         }
+                var followerItem = document.createElement('li');
+                followerItem.className = 'followerchat-user-item';
                 
-        //         userImg.alt = profile.username;
-        //         userImg.className = 'followerprofile-picture';
-        //         followerItem.appendChild(userImg);
+                var userImg = document.createElement('img');
+                console.log(profile.profile_url)
+                if(profile.profile_url=== "Not"){
+                    userImg.src ="{% static 'image/profile.png' %}";
+                }
+                else{
+                    userImg.src = "data:image;base64," +profile.profile_url;
+                }
+                
+                userImg.alt = profile.username;
+                userImg.className = 'followerprofile-picture';
+                followerItem.appendChild(userImg);
 
-        //         var userName = document.createElement('span');
-        //         userName.className = 'followerchat-user-name';
-        //         userName.textContent = profile.username;
-        //         followerItem.appendChild(userName);
+                var userName = document.createElement('span');
+                userName.className = 'followerchat-user-name';
+                userName.textContent = profile.username;
+                followerItem.appendChild(userName);
 
-        //         var followerButtons = document.createElement('div');
-        //         followerButtons.className = 'follower-buttons';
+                var followerButtons = document.createElement('div');
+                followerButtons.className = 'follower-buttons';
 
-        //         var acceptButton = document.createElement('button');
-        //         acceptButton.textContent = 'Accept';
-        //         acceptButton.className = 'followerchat-user-action';
-        //         // Add event listener for accept button
-        //         acceptButton.addEventListener('click', function() {
-        //             submitAction(profile.username, 'accept');
-        //         });
-        //         followerButtons.appendChild(acceptButton);
+                var acceptButton = document.createElement('button');
+                acceptButton.textContent = 'Accept';
+                acceptButton.className = 'followerchat-user-action';
+                // Add event listener for accept button
+                acceptButton.addEventListener('click', function() {
+                    submitAction(profile.username, 'accept');
+                });
+                followerButtons.appendChild(acceptButton);
 
-        //         var declineButton = document.createElement('button');
-        //         declineButton.textContent = 'Decline';
-        //         declineButton.className = 'followerchat-user-action';
-        //         // Add event listener for decline button
-        //         declineButton.addEventListener('click', function() {
-        //             submitAction(profile.username, 'decline');
-        //         });
-        //         followerButtons.appendChild(declineButton);
+                var declineButton = document.createElement('button');
+                declineButton.textContent = 'Decline';
+                declineButton.className = 'followerchat-user-action';
+                // Add event listener for decline button
+                declineButton.addEventListener('click', function() {
+                    submitAction(profile.username, 'decline');
+                });
+                followerButtons.appendChild(declineButton);
 
-        //         followerItem.appendChild(followerButtons);
+                followerItem.appendChild(followerButtons);
 
-        //         chatUsersList.appendChild(followerItem);
-        //         totalFollowerCount++;
-        //     });
+                chatUsersList.appendChild(followerItem);
+                totalFollowerCount++;
+            });
 
-        //     document.getElementById('notification-count').textContent = totalFollowerCount;
+            document.getElementById('notification-count').textContent = totalFollowerCount;
             
-        // }
-
-window.onload = function() {
-        var userNameElement = document.querySelector('.followerchat-user-name');
-        if (userNameElement.textContent.trim() !== '') {
-            document.getElementById('notification-detailsall').style.display = 'block';
         }
-    };
+
+// window.onload = function() {
+//         var userNameElement = document.querySelector('.followerchat-user-name');
+//         console.log(userNameElement)
+//         if (userNameElement.textContent.trim() !== '') {
+//             document.getElementById('notification-detailsall').style.display = 'block';
+//         }
+//     };
 function submitAction(username, action) {
 
     var data = JSON.stringify({ username: username, action: action });
@@ -209,7 +211,6 @@ function submitAction(username, action) {
             chatUsersList.innerHTML = '';
             users.forEach(user => {
                 // Skip adding the current user's profile
-                console.log(users)
                 if (user.follower_profiles || user.followers_profile){
                     return;
                 }
@@ -220,19 +221,15 @@ function submitAction(username, action) {
                 
                 var listItem = document.createElement('li');
                 listItem.className = 'chat-user-item';
-                console.log(user.bio,"================")
                 listItem.onclick = function() {
                     if (user.profile === "Not") {
-                        console.log(user.bio,"================")
                         showUserProfile(user.name, user.bio, "{% static 'image/profile.png' %}",user.followbtn);
                     }
                     else{
-                        console.log(user.bio,"================")
                         showUserProfile(user.name, user.bio,  "data:image;base64,"+user.profile,user.followbtn);
                     }
                 };
                 var userImg = document.createElement('img');
-                console.log(user.profile)
                 if (user.profile === "Not") {
                     userImg.src="{% static 'image/profile.png' %}";
                 }
@@ -269,11 +266,11 @@ function submitAction(username, action) {
                 editProfile.style.display = 'none'; // Close the form if it's already open
             } else {
                 var userNameElement = document.querySelector('.followerchat-user-name');
+                console.log(userNameElement)
                 if (userNameElement.textContent.trim() !== '') {
                     document.getElementById('notification-detailsall').style.display = 'block';
                     editProfile.style.display = 'block'; 
                 }
-                
             }
         }
         $.ajax({
@@ -283,7 +280,7 @@ function submitAction(username, action) {
                 var userData = response.user_data;
                 var followData = response.follow_data;
                 updateChatUsersList(userData)
-                // updateNotificationDetails(followData)
+                updateNotificationDetails(followData)
                 // Process userData and followData as needed
             },
             error: function(xhr, status, error) {
@@ -394,6 +391,33 @@ function submitAction(username, action) {
     if (userdetails) {
         userdetails.style.display = 'none';
     }
+});
+
+const userList = document.getElementById('user-list');
+let isMouseDown = false;
+let startX;
+let scrollLeft;
+
+userList.addEventListener('mousedown', (e) => {
+  isMouseDown = true;
+  startX = e.pageX - userList.offsetLeft;
+  scrollLeft = userList.scrollLeft;
+});
+
+userList.addEventListener('mouseleave', () => {
+  isMouseDown = false;
+});
+
+userList.addEventListener('mouseup', () => {
+  isMouseDown = false;
+});
+
+userList.addEventListener('mousemove', (e) => {
+  if (!isMouseDown) return;
+  e.preventDefault();
+  const x = e.pageX - userList.offsetLeft;
+  const walk = (x - startX) * 3; // Adjust scroll speed
+  userList.scrollLeft = scrollLeft - walk;
 });
 
     </script>

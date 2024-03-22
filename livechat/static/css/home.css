@@ -75,6 +75,7 @@ nav ul li a:hover {
     color: red;
 }
 
+
 .edit-profile-container {
     position: absolute;
     top: 50%;
@@ -155,6 +156,27 @@ nav ul li a:hover {
 .user-details-container p,button{
     margin-left: 30px;
 }
+
+
+.chat-users-container {
+    width: 800px; /* Adjust width as needed */
+    height: 300px; /* Adjust height as needed */
+    margin: 0em;
+    overflow-y: auto;
+    border-radius: 1px solid;
+  }
+  
+  .chat-users-list {
+    overflow-x: auto;
+    white-space: nowrap; /* Prevent wrapping of list items */
+    direction: ltr; /* Reset direction to left-to-right */
+  }
+  
+  .chat-user-item {
+    display: inline-block; /* Display list items in a row */
+    margin-right: 50px !important; /* Adjust spacing between items */
+    box-sizing: border-box;
+  }
 
 
 .notification-container {

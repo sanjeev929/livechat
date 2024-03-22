@@ -229,7 +229,33 @@ def get_user_details(request):
             pass
         try:
             current_user_name = request.COOKIES.get('user')
+            cursor.execute("""
+                    SELECT followersrequest
+                    FROM profile
+                    WHERE username = %s
+                """, (current_user_name,))
+            results = cursor.fetchall()
+            for name in results[0][0]:
+                print("name",name)
+                cursor.execute("""
+                    SELECT username, CASE 
+                            WHEN profile.profile_picture IS NULL THEN 'Not' 
+                            ELSE encode(profile.profile_picture, 'base64') 
+                        END AS profile_picture
+                    FROM profile
+                    WHERE username = %s
+                """, (name,))
+                results = cursor.fetchall()
 
+                for row in results:
+                    username = row[0]
+                    profile_picture = row[1]
+                    # print("checking",username,profile_picture)
+                follow_data.append({
+                            'username': username,
+                            "profile_url":profile_picture
+                        })  
+                
         except:
             pass
         try:
@@ -248,6 +274,7 @@ def get_user_details(request):
             #     'prfile':profile_picture
             # }
             try:
+                current_user_name = request.COOKIES.get('user')
                 cursor.execute("""
                     SELECT 
                         auth_user.username, 
@@ -264,15 +291,11 @@ def get_user_details(request):
                
                 results = cursor.fetchall()
                 cursor.execute("""
-                SELECT 
-                    profile.followingrequest
-                FROM 
-                    auth_user
-                LEFT JOIN 
-                    profile ON auth_user.username = profile.username
-                WHERE 
-                    auth_user.username = profile.username;
-                               """)
+                    SELECT profile.followingrequest
+                    FROM auth_user
+                    LEFT JOIN profile ON auth_user.username = profile.username
+                    WHERE auth_user.username = %s;
+                """, (current_user_name,))
                 results1 = cursor.fetchall()
                 
                 for row in results:
@@ -346,6 +369,7 @@ def get_user_details(request):
                                 })
         except Exception as e:
             pass
+        print(user_data)
         return JsonResponse({'user_data': user_data, 'follow_data':follow_data })
     except Exception as e:
         return redirect("/")    
