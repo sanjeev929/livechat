@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect,get_object_or_404
-import json
+import json,random
 from django.http import JsonResponse,Http404
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
@@ -370,6 +370,8 @@ def get_user_details(request):
         except Exception as e:
             pass
         print(user_data)
+        random.shuffle(user_data)
+        user_data = user_data[:4]
         return JsonResponse({'user_data': user_data, 'follow_data':follow_data })
     except Exception as e:
         return redirect("/")    
@@ -437,22 +439,21 @@ def follow(request):
             else:
                 follow1(current_user_name,follow_value,account_name)
         elif follow_value == 'Un Follow':
-            cursor.execute("""
-                    SELECT followersrequest
-                    FROM profile
-                    WHERE username = %s
-                """, (account_name,))
-            existing_follow_requests = cursor.fetchone()[0]
-            if existing_follow_requests is None:
-                existing_follow_requests = []
-                existing_follow_requests.remove(current_user_name)
+            print("unfollow")
+            # cursor.execute("""
+            #         SELECT followersrequest
+            #         FROM profile
+            #         WHERE username = %s
+            #     """, (account_name,))
+            # existing_follow_requests = cursor.fetchone()[0]
+            # if existing_follow_requests is None:
+            #     existing_follow_requests = []
+            #     existing_follow_requests.remove(current_user_name)
 
         else:
             pass
         message='OK'
-
         return JsonResponse({'message': message})
-
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
 def accept_decline_follow_view(request):

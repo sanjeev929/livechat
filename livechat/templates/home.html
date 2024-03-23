@@ -50,7 +50,7 @@
                     </div>
                     <span class="followerchat-user-name"></span>
                     <div class="follower-buttons">
-                        <button class="followerchat-user-action">Accept</button>
+                        <button class="followerchat-user-action">Accept</button><br><br>
                         <button class="followerchat-user-action">Decline</button>
                     </div>
                 </div>
@@ -291,58 +291,48 @@ function submitAction(username, action) {
         });
 
         document.addEventListener("DOMContentLoaded", function() {
-        document.getElementById('follow-button').addEventListener('click', function(event) {
-            event.preventDefault(); // Prevent default form submission behavior
-            
-            // Extract necessary data
-            var accountName = document.getElementById('user-name').textContent;
-            var followResponse = document.getElementById('follow-button').textContent;
+            var followButton = document.getElementById('follow-button');
+            var unfollowButton = document.getElementById('unfollow-button');
 
-            // Get CSRF token
-            var csrftoken = getCookie('csrftoken');
+            // Function to handle follow/unfollow action
+            function handleFollowAction(button) {
+                // Extract necessary data
+                var accountName = document.getElementById('user-name').textContent;
+                var followResponse = button.textContent.trim(); // Get the current button text
+                
+                // Toggle button text
+                button.textContent = followResponse === 'Follow' ? 'Un Follow' : 'Follow';
+                console.log(followResponse)
+                // Get CSRF token
+                var csrftoken = getCookie('csrftoken');
 
-            // Send data to the backend using AJAX
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/follow/', true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.setRequestHeader('X-CSRFToken', csrftoken); // Include CSRF token in headers
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    // Handle response from the server if needed
-                    console.log('Follow request sent successfully');
-                }
-            };
-            var data = JSON.stringify({ accountName: accountName, followResponse: followResponse });
-            xhr.send(data);
+                // Send data to the backend using AJAX
+                var xhr = new XMLHttpRequest();
+                xhr.open('POST', '/follow/', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.setRequestHeader('X-CSRFToken', csrftoken); // Include CSRF token in headers
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        // Handle response from the server if needed
+                        console.log('Follow/unfollow request sent successfully');
+                    }
+                };
+                var data = JSON.stringify({ accountName: accountName, followResponse: followResponse });
+                xhr.send(data);
+            }
+
+            // Event listener for follow button
+            followButton.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent default form submission behavior
+                handleFollowAction(followButton);
+            });
+
+            // Event listener for unfollow button
+            unfollowButton.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent default form submission behavior
+                handleFollowAction(unfollowButton);
+            });
         });
-    });
-
-    document.addEventListener("DOMContentLoaded", function() {
-        document.getElementById('unfollow-button').addEventListener('click', function(event) {
-            event.preventDefault(); // Prevent default form submission behavior
-            
-            // Extract necessary data
-            var accountName = document.getElementById('user-name').textContent;
-            var followResponse = document.getElementById('unfollow-button').textContent;
-
-            // Get CSRF token
-            var csrftoken = getCookie('csrftoken');
-
-            // Send data to the backend using AJAX
-            var xhr = new XMLHttpRequest();
-            xhr.open('POST', '/follow/', true);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.setRequestHeader('X-CSRFToken', csrftoken); // Include CSRF token in headers
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    // Handle response from the server if needed
-                    console.log('Follow request sent successfully');
-                }
-            };
-            var data = JSON.stringify({ accountName: accountName, followResponse: followResponse });
-            xhr.send(data);
-        });
-    });
 
     // Function to retrieve CSRF token from cookies
     function getCookie(name) {

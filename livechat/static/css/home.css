@@ -89,7 +89,7 @@ nav ul li a:hover {
 .login-profile-container  {
     align-self: center;
     width:400px;
-    height: 400px;
+    height: 450px;
     padding: 20px;
     border-radius: 3%;
     border: 1px solid #605d5d00;
@@ -104,13 +104,13 @@ nav ul li a:hover {
 }
 .login-profile-container a {
     position: relative; 
-    top: -55px; 
+    top: 10px; 
     left: 250px;
 }
 .register-profile-container{
     align-self: center;
     width:500px;
-    height: 580px;
+    height: 600px;
     padding: 20px;
     border-radius: 3%;
     border: 1px solid #605d5d00;
@@ -125,8 +125,8 @@ nav ul li a:hover {
 }
 .register-profile-container a {
     position: relative; 
-    top: -55px; 
-    left: 350px;
+    top: 0px; 
+    left: 400px;
 }
 /* User details profile */
 .user-details-container {
@@ -179,20 +179,24 @@ nav ul li a:hover {
     left: 70px; /* Adjust from the left */
     border: 2px solid #61616116; /* Add border */
     border-radius: 20px;
-    width: 400px; /* Adjust width as needed */
+    width: 450px; /* Adjust width as needed */
     height: 150px; /* Adjust height as needed */
     
     /* Center content horizontally and vertically */
     display: flex;
     align-items: center;
     justify-content: center;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; 
   }
   
   .chat-user-item {
     display: flex; /* Use flexbox to align items vertically */
     flex-direction: column; /* Stack items vertically */
     align-items: center; /* Center items horizontally */
-    margin-left: 45px;
+    margin-left: auto;
+    top: 90px; /* Adjust from the top */
+    left: 10px; /* Adjust from the left */
   }
   
   .chat-user-img {
@@ -209,6 +213,7 @@ nav ul li a:hover {
 .chat-users-list::-webkit-scrollbar {
     width: 12px; /* Set the width of the scrollbar */
     height: 12px; /* Set the height of the scrollbar */
+    display: none;
   }
   
   /* Track */
@@ -237,14 +242,14 @@ nav ul li a:hover {
 .notification-container {
     position: fixed;
     top: 50%;
-    left: 50%;
+    left: 60%;
     transform: translate(-50%, -50%);
     background-color: #ffffff;
     border: 2px solid rgb(255, 255, 255);
     border-radius: 20px;
     padding: 20px;
     width: 600px;
-    max-height: 200px; 
+    max-height: 250px; 
     overflow-y: scroll;
     direction: ltr;
 }
@@ -274,7 +279,14 @@ nav ul li a:hover {
 }
 
 .follower-buttons {
+    width: 150px;
     margin-left: auto; /* Push buttons to the right */
+    margin-bottom: 10px; 
+    display: block;
+}
+.follower-buttons button {
+    display: block; /* Ensure each button is displayed as a block element */
+    margin-bottom: 10px; /* Add margin below each button */
 }
 .notification-container .followerchat-users-list {
     list-style-type: none; /* Removes bullets from the list */
