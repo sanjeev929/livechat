@@ -158,29 +158,28 @@ nav ul li a:hover {
 
 .chat-users-container {
     width: 800px; /* Adjust width as needed */
-    height: 1500px; /* Adjust height as needed */
+    height: auto; /* Let the height adjust based on content */
     position: relative; /* Make the container a reference for positioning */
-  }
-  
-  .chat-users-heading {
-    font-size:large;
+}
+
+.chat-users-heading {
+    font-size: large;
     position: absolute; /* Position the heading absolutely */
     top: 30px; /* Adjust from the top */
     left: 70px; /* Adjust from the left */
-  }
-  
-  .chat-users-list {
+}
+
+.chat-users-list {
     background-color: #f9f9f9;
     white-space: nowrap; /* Prevent wrapping of list items */
-    overflow: auto; /* Add scrollbar */
     direction: ltr; /* Reset direction to left-to-right */
     position: absolute; /* Position the list container absolutely */
     top: 90px; /* Adjust from the top */
     left: 70px; /* Adjust from the left */
     border: 2px solid #61616116; /* Add border */
     border-radius: 20px;
-    width: 450px; /* Adjust width as needed */
-    height: 150px; /* Adjust height as needed */
+    width: auto; /* Adjust width as needed */
+    height: 110px; /* Let the height adjust based on content */
     
     /* Center content horizontally and vertically */
     display: flex;
@@ -188,55 +187,31 @@ nav ul li a:hover {
     justify-content: center;
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; 
-  }
-  
-  .chat-user-item {
+    overflow: visible; /* Ensure all items are visible */
+}
+
+.chat-user-item {
     display: flex; /* Use flexbox to align items vertically */
     flex-direction: column; /* Stack items vertically */
     align-items: center; /* Center items horizontally */
-    margin-left: auto;
-    top: 90px; /* Adjust from the top */
-    left: 10px; /* Adjust from the left */
-  }
-  
-  .chat-user-img {
+    margin-left: 20px; /* Add left margin for gap */
+    margin-right: 20px; /* Add right margin for gap */
+}
+
+.chat-user-item .chat-user-img {
     margin-bottom: 5px; /* Adjust spacing between image and username */
-  }
-  
-  .chat-user-name {
+    width: 40px !important; /* Adjust image width */
+    height: 40px !important; /* Adjust image height */
+    border-radius: 50% !important; /* Make the image circular */
+}
+
+.chat-user-item .chat-user-name {
     margin-top: auto; /* Push the username to the bottom */
     margin-left: 10px;
-  }
+    font-size: 20px !important; /* Adjust font size */
+}
 
 
-/* Hide the default scrollbar */
-.chat-users-list::-webkit-scrollbar {
-    width: 12px; /* Set the width of the scrollbar */
-    height: 12px; /* Set the height of the scrollbar */
-    display: none;
-  }
-  
-  /* Track */
-  .chat-users-list::-webkit-scrollbar-track {
-    background: #f1f1f1; /* Set the background color of the scrollbar track */
-  }
-  
-  /* Handle */
-  .chat-users-list::-webkit-scrollbar-thumb {
-    background: #888; /* Set the color of the scrollbar handle */
-    border-radius: 25px; /* Make the scrollbar handle round */
-    border: none; /* Remove border */
-  }
-  
-  /* Handle on hover */
-  .chat-users-list::-webkit-scrollbar-thumb:hover {
-    background: #555; /* Change the color of the scrollbar handle on hover */
-  }
-  
-  /* Slide bar effect */
-  .chat-users-list:hover::-webkit-scrollbar-thumb {
-    transition: background-color 0.3s ease; /* Add transition effect */
-  }
   
   
 .notification-container {
@@ -248,7 +223,7 @@ nav ul li a:hover {
     border: 2px solid rgb(255, 255, 255);
     border-radius: 20px;
     padding: 20px;
-    width: 600px;
+    width: 1500px;
     max-height: 250px; 
     overflow-y: scroll;
     direction: ltr;
