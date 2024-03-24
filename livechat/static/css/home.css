@@ -181,6 +181,7 @@ nav ul li a:hover {
     width: auto; /* Adjust width as needed */
     height: 110px; /* Let the height adjust based on content */
     
+    
     /* Center content horizontally and vertically */
     display: flex;
     align-items: center;
