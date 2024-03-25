@@ -425,7 +425,7 @@ def follow1(current_user_name,follow_value,account_name):
                 DO UPDATE SET followersrequest = %s
             """, (account_name, existing_follow_requests, existing_follow_requests))
             connection.commit()
-
+            return "ok"
 def follow(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -464,32 +464,58 @@ def accept_decline_follow_view(request):
             action = data.get('action')
             # Retrieve the current user's profile
             current_user_name = request.COOKIES.get('user')
-            current_user = User.objects.get(username=current_user_name)
-            current_user_profile = UserProfile.objects.get(user=current_user)
-            # Retrieve the follower's profile
+            print(username,action,current_user_name)
+
+
+            existing_following_requests=[]
+            cursor.execute("""
+                    SELECT followingrequest
+                    FROM profile
+                    WHERE username = %s
+                """, (current_user_name,))
             try:
-                followe_user = User.objects.get(username=username)
-                follower_profile = UserProfile.objects.get(user=followe_user)
-            except Exception as e:  
-            # Retrieve the follow instance
+                existing_following_requests = cursor.fetchone()[0]
+            except:
                 pass
-            try:    
-                follow_instance = get_object_or_404(Follow, follower=follower_profile, following=current_user_profile)
-            except Exception as e:  
+           
+            if existing_following_requests is None:
+                existing_following_requests = []
+            existing_following_requests.append(account_name)
+            existing_following_requests=list(set(existing_following_requests))
+
+            
+            cursor.execute("""
+                INSERT INTO profile (username, followingrequest)
+                VALUES (%s, %s)
+                ON CONFLICT (username)
+                DO UPDATE SET followingrequest = %s
+            """, (current_user_name, existing_following_requests, existing_following_requests))
+            connection.commit()
+
+            # Follow Request====================================================================
+            existing_follow_requests=[]
+            cursor.execute("""
+                    SELECT followersrequest
+                    FROM profile
+                    WHERE username = %s
+                """, (account_name,))
+            try:
+                existing_follow_requests = cursor.fetchone()[0]
+            except:
                 pass
-            if action == 'accept':
-                
-                # Create a new FollowAction for accepting the follow request
-                try:
-                    FollowAction.objects.create(user_profile=current_user_profile,follow=follow_instance, action='accept')
-                except Exception as e:
-                    pass
-                follow_instance.delete()
-            elif action == 'decline':
-                # Delete the follow relationship if it is declined
-                follow_instance.delete()
-            else:
-                return JsonResponse({'error': 'Invalid action'}, status=400)
+    
+            if existing_follow_requests is None:
+                existing_follow_requests = []
+            existing_follow_requests.append(current_user_name)
+            existing_follow_requests=list(set(existing_follow_requests))
+            cursor.execute("""
+                INSERT INTO profile (username, followersrequest)
+                VALUES (%s, %s)
+                ON CONFLICT (username)
+                DO UPDATE SET followersrequest = %s
+            """, (account_name, existing_follow_requests, existing_follow_requests))
+            connection.commit()
+
 
             return JsonResponse({'success': True})
         except Http404:
