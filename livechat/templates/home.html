@@ -161,6 +161,8 @@
                 // Add event listener for accept button
                 acceptButton.addEventListener('click', function() {
                     submitAction(profile.username, 'accept');
+                    acceptButton.style.display='none'
+
                 });
                 followerButtons.appendChild(acceptButton);
 
@@ -170,6 +172,8 @@
                 // Add event listener for decline button
                 declineButton.addEventListener('click', function() {
                     submitAction(profile.username, 'decline');
+                    declineButton.style.display='none'
+
                 });
                 followerButtons.appendChild(declineButton);
 
@@ -382,6 +386,21 @@ function submitAction(username, action) {
     if (userdetails) {
         userdetails.style.display = 'none';
     }
+});
+document.addEventListener("DOMContentLoaded", function() {
+    // Get the container that holds both buttons
+    var container = document.querySelector('.follower-buttons');
+
+    // Function to hide the notification container
+    function hideNotificationContainer() {
+        var notificationContainer = document.getElementById('notification-detailsall');
+        notificationContainer.style.display = 'none';
+    }
+    
+    // Add event listener for the buttons container
+    container.addEventListener('click', function() {
+        hideNotificationContainer();
+    });
 });
     </script>
 </body>

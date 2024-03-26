@@ -460,62 +460,173 @@ def accept_decline_follow_view(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         try:
-            username = data.get('username')
+            friendname = data.get('username')
             action = data.get('action')
             # Retrieve the current user's profile
             current_user_name = request.COOKIES.get('user')
-            print(username,action,current_user_name)
-
-
-            existing_following_requests=[]
-            cursor.execute("""
-                    SELECT followingrequest
-                    FROM profile
-                    WHERE username = %s
-                """, (current_user_name,))
-            try:
-                existing_following_requests = cursor.fetchone()[0]
-            except:
-                pass
-           
-            if existing_following_requests is None:
-                existing_following_requests = []
-            existing_following_requests.append(account_name)
-            existing_following_requests=list(set(existing_following_requests))
-
             
-            cursor.execute("""
-                INSERT INTO profile (username, followingrequest)
-                VALUES (%s, %s)
-                ON CONFLICT (username)
-                DO UPDATE SET followingrequest = %s
-            """, (current_user_name, existing_following_requests, existing_following_requests))
-            connection.commit()
+            print(friendname,action,current_user_name)
+            if action=="accept":
+                print(friendname,action,current_user_name)
+                # Follow Request====================================================================
+                existing_follow_requests=[]
+                cursor.execute("""
+                        SELECT followersrequest
+                        FROM profile
+                        WHERE username = %s
+                    """, (current_user_name,))
+                try:
+                    existing_follow_requests = cursor.fetchone()[0]
+                except:
+                    pass
+        
+                if existing_follow_requests is None:
+                    existing_follow_requests = []
+                try:    
+                    existing_follow_requests.remove(friendname)
+                except:
+                    pass    
+                existing_follow_requests=list(set(existing_follow_requests))
+                cursor.execute("""
+                    INSERT INTO profile (username, followersrequest)
+                    VALUES (%s, %s)
+                    ON CONFLICT (username)
+                    DO UPDATE SET followersrequest = %s
+                """, (current_user_name, existing_follow_requests, existing_follow_requests))
+                connection.commit()
+                # freinds add ===================================================================
 
-            # Follow Request====================================================================
-            existing_follow_requests=[]
-            cursor.execute("""
-                    SELECT followersrequest
-                    FROM profile
+                cursor.execute("SELECT freinds FROM profile WHERE username = %s", (current_user_name,))
+                try:
+                    existing_friends = cursor.fetchone()[0]  # Fetch the existing friends list
+                except:
+                    pass
+                if existing_friends is None:
+                    existing_friends=[]
+                existing_friends.append(friendname)
+                existing_friends=list(set(existing_friends))
+                cursor.execute("""
+                    UPDATE profile
+                    SET freinds = %s
                     WHERE username = %s
-                """, (account_name,))
-            try:
-                existing_follow_requests = cursor.fetchone()[0]
-            except:
-                pass
-    
-            if existing_follow_requests is None:
-                existing_follow_requests = []
-            existing_follow_requests.append(current_user_name)
-            existing_follow_requests=list(set(existing_follow_requests))
-            cursor.execute("""
-                INSERT INTO profile (username, followersrequest)
-                VALUES (%s, %s)
-                ON CONFLICT (username)
-                DO UPDATE SET followersrequest = %s
-            """, (account_name, existing_follow_requests, existing_follow_requests))
-            connection.commit()
+                """, (existing_friends, current_user_name))
 
+                # Commit the transaction
+                connection.commit()
+
+
+
+                cursor.execute("SELECT freinds FROM profile WHERE username = %s", (friendname,))
+                try:
+                    existing_friends = cursor.fetchone()[0]  # Fetch the existing friends list
+                except:
+                    pass
+                if existing_friends is None:
+                    existing_friends=[]
+                existing_friends.append(current_user_name)
+                existing_friends=list(set(existing_friends))
+                cursor.execute("""
+                    UPDATE profile
+                    SET freinds = %s
+                    WHERE username = %s
+                """, (existing_friends, friendname))
+
+                # Commit the transaction
+                connection.commit()
+
+            if action == "decline":
+                print(friendname,action,current_user_name)
+                # freinds add ===================================================================
+                existing_follow_requests=[]
+                cursor.execute("""
+                        SELECT followersrequest
+                        FROM profile
+                        WHERE username = %s
+                    """, (current_user_name,))
+                try:
+                    existing_follow_requests = cursor.fetchone()[0]
+                except:
+                    pass
+        
+                if existing_follow_requests is None:
+                    existing_follow_requests = []
+                try:    
+                    existing_follow_requests.remove(friendname)
+                except:
+                    pass    
+                existing_follow_requests=list(set(existing_follow_requests))
+                cursor.execute("""
+                    INSERT INTO profile (username, followersrequest)
+                    VALUES (%s, %s)
+                    ON CONFLICT (username)
+                    DO UPDATE SET followersrequest = %s
+                """, (current_user_name, existing_follow_requests, existing_follow_requests))
+                connection.commit()
+
+                existing_following_requests=[]
+                cursor.execute("""
+                        SELECT followingrequest
+                        FROM profile
+                        WHERE username = %s
+                    """, (friendname,))
+                try:
+                    existing_following_requests = cursor.fetchone()[0]
+                except:
+                    pass
+        
+                if existing_following_requests is None:
+                    existing_following_requests = []
+                try:    
+                    existing_following_requests.remove(current_user_name)
+                except:
+                    pass    
+                existing_following_requests=list(set(existing_following_requests))
+                cursor.execute("""
+                    INSERT INTO profile (username, followingrequest)
+                    VALUES (%s, %s)
+                    ON CONFLICT (username)
+                    DO UPDATE SET followingrequest = %s
+                """, (friendname, existing_following_requests, existing_following_requests))
+                connection.commit()
+                
+                try:
+                    cursor.execute("SELECT freinds FROM profile WHERE username = %s", (friendname,))
+                    try:
+                        existing_friends = cursor.fetchone()[0]  # Fetch the existing friends list
+                    except:
+                        pass
+                    if existing_friends is None:
+                        existing_friends=[]
+                    existing_friends.remove(current_user_name)
+                    existing_friends=list(set(existing_friends))
+                    cursor.execute("""
+                        UPDATE profile
+                        SET freinds = %s
+                        WHERE username = %s
+                    """, (existing_friends, friendname))
+
+                    # Commit the transaction
+                    connection.commit()    
+
+                    cursor.execute("SELECT freinds FROM profile WHERE username = %s", (current_user_name,))
+                    try:
+                        existing_friends = cursor.fetchone()[0]  # Fetch the existing friends list
+                    except:
+                        pass
+                    if existing_friends is None:
+                        existing_friends=[]
+                    existing_friends.remove(friendname)
+                    existing_friends=list(set(existing_friends))
+                    cursor.execute("""
+                        UPDATE profile
+                        SET freinds = %s
+                        WHERE username = %s
+                    """, (existing_friends, current_user_name))
+
+                    # Commit the transaction
+                    connection.commit()
+                except:
+                    pass    
 
             return JsonResponse({'success': True})
         except Http404:

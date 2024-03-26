@@ -128,6 +128,7 @@ nav ul li a:hover {
     top: 0px; 
     left: 400px;
 }
+
 /* User details profile */
 .user-details-container {
     width: 300px;
@@ -213,12 +214,10 @@ nav ul li a:hover {
 }
 
 
-  
-  
 .notification-container {
     position: fixed;
-    top: 50%;
-    left: 60%;
+    margin-top: 200px;
+    margin-left: 1100px;
     transform: translate(-50%, -50%);
     background-color: #ffffff;
     border: 2px solid rgb(255, 255, 255);
@@ -278,7 +277,6 @@ nav ul li a:hover {
     border-radius: 4px;
 }
 
-
 .chat-user-item:last-child {
     margin-right: 0;
 }
@@ -294,9 +292,6 @@ nav ul li a:hover {
     margin: 0;
     font-size: 14px;
 }
-
-/* Profile picture label */
-
 
 /* Profile picture preview */
 .profile-preview {
