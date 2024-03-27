@@ -207,24 +207,41 @@ def submitbio(request):
     return redirect(home)
 
 def get_user_details(request):
-    followed_users = []
+    friends = []
     follow_data=[]
     user_data = []
     followbtn=True
     try:
         try:
             current_user_name = request.COOKIES.get('user')
-            current_user = User.objects.get(username=current_user_name)
-            current_user_profile = UserProfile.objects.get(user=current_user)
-            follows = Follow.objects.filter(follower=current_user_profile)
+            cursor.execute("""
+                    SELECT freinds
+                    FROM profile
+                    WHERE username = %s
+                """, (current_user_name,))
+            results = cursor.fetchall()
+            print("hiiiiiiiiiiiii",results)
+            for name in results[0][0]:
+                print("name",name)
+                cursor.execute("""
+                    SELECT username, CASE 
+                            WHEN profile.profile_picture IS NULL THEN 'Not' 
+                            ELSE encode(profile.profile_picture, 'base64') 
+                        END AS profile_picture
+                    FROM profile
+                    WHERE username = %s
+                """, (name,))
+                results = cursor.fetchall()
 
-        
-            for follow_instance in follows:
-                followed_user_profile = follow_instance.following
-                followed_users.append({
-                    'username': followed_user_profile.user.username,
-                    'profile_url': followed_user_profile.profile.url
-                })
+                for row in results:
+                    username = row[0]
+                    profile_picture = row[1]
+                    # print("checking",username,profile_picture)
+                friends.append({
+                            'username': username,
+                            "profile_url":profile_picture
+                        })  
+            
         except:
             pass
         try:
@@ -236,7 +253,6 @@ def get_user_details(request):
                 """, (current_user_name,))
             results = cursor.fetchall()
             for name in results[0][0]:
-                print("name",name)
                 cursor.execute("""
                     SELECT username, CASE 
                             WHEN profile.profile_picture IS NULL THEN 'Not' 
@@ -305,8 +321,7 @@ def get_user_details(request):
                             if name in data[0]:
                                 followbtn=False
                             else:
-                                followbtn=True   
-                    print(name,followbtn)                  
+                                followbtn=True                  
                     try:
                         if isinstance(profile_picture, memoryview):
                             profile_picture = profile_picture.tobytes()
@@ -369,10 +384,10 @@ def get_user_details(request):
                                 })
         except Exception as e:
             pass
-        print(user_data)
         random.shuffle(user_data)
         user_data = user_data[:4]
-        return JsonResponse({'user_data': user_data, 'follow_data':follow_data })
+        print(friends)
+        return JsonResponse({'user_data': user_data, 'follow_data':follow_data,"friends":friends })
     except Exception as e:
         return redirect("/")    
 

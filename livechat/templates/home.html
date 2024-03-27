@@ -17,7 +17,7 @@
             <li> <img id="profile-picture-preview1" class="profile-preview1" src="{% static 'image/profile.png' %}" alt="Profile Picture"></li>
             {%endif%}
             <li><a href="/">Home</a></li>
-            <li><a href="#" onclick="showFriends()"><span id="friends-count">Friends 0</span></a></li>
+            <li><a href="#" onclick="showfriends()"><span id="friends-count">Friends 0</span></a></li>
             <li><a href="#" onclick="showNotifications()">Notifications <span id="notification-count">0</span></a></li>
             <li class="dropdown">
                 <a href="#">Settings</a>
@@ -42,8 +42,8 @@
 
     
     <div id="notification-detailsall" class="notification-container" style="display: none;">
-        <ul class="followerchat-users-list">
-            <li class="followerchat-user-item">
+        <ul class="friendslist-users-list">
+            <li class="friendslist-user-item">
                 <div class="container-content">
                     <div class="profile-picture-container">
                         <img class="followerprofile-picture" src="" alt="Profile Picture">
@@ -57,6 +57,25 @@
             </li>
         </ul>
     </div>
+
+    <div id="friends-detailsall" class="friendslist-container" style="display: none;">
+        <ul class="friendslist-users-list">
+            <li class="friendslist-user-item">
+                <div class="container-content">
+                    <div class="profile-picture-container">
+                        <img class="friendslistprofile-picture" src="" alt="Profile Picture">
+                    </div>
+                    <span class="friendslist-user-name"></span>
+                    <div class="friendslist-buttons">
+                        <button class="friendslist-user-action">Accept</button><br><br>
+                        <button class="friendslist-user-action">Decline</button>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+    
+    
 
     <div id="edit-profile" class="edit-profile-container" style="display: none;">
         <!-- Edit profile form -->
@@ -210,6 +229,52 @@ function submitAction(username, action) {
     xhr.send(data);
 }
 
+        function friendslist(friends) {
+            console.log(friends)
+            // var chatUsersList = document.querySelector('.chat-users-list');
+            // chatUsersList.innerHTML = '';
+            // users.forEach(user => {
+            //     // Skip adding the current user's profile
+            //     if (user.follower_profiles || user.followers_profile){
+            //         return;
+            //     }
+                
+            //     if (user.name === currentusername) {
+            //         return;
+            //     }
+                
+            //     var listItem = document.createElement('li');
+            //     listItem.className = 'chat-user-item';
+            //     listItem.onclick = function() {
+            //         if (user.profile === "Not") {
+            //             showUserProfile(user.name, user.bio, "{% static 'image/profile.png' %}",user.followbtn);
+            //         }
+            //         else{
+            //             showUserProfile(user.name, user.bio,  "data:image;base64,"+user.profile,user.followbtn);
+            //         }
+            //     };
+            //     var userImg = document.createElement('img');
+            //     if (user.profile === "Not") {
+            //         userImg.src="{% static 'image/profile.png' %}";
+            //     }
+            //     else{
+            //         userImg.src = "data:image;base64," + user.profile;
+            //     }
+                
+            //     userImg.alt = user.name;
+            //     userImg.className = 'chat-user-img';
+            //     listItem.appendChild(userImg);
+
+            //     var userName = document.createElement('span');
+            //     userName.className = 'chat-user-name';
+            //     userName.textContent = user.name;
+            //     listItem.appendChild(userName);
+
+            //     chatUsersList.appendChild(listItem);
+            // });
+        }
+
+
         // Function to update chat users list
         function updateChatUsersList(users) {
             var chatUsersList = document.querySelector('.chat-users-list');
@@ -278,12 +343,29 @@ function submitAction(username, action) {
                 }
             }
         }
+
+        function showfriends() {
+            var editProfile = document.getElementById('friends-detailsall');
+            if (editProfile.style.display === 'block') {
+                editProfile.style.display = 'none'; // Close the form if it's already open
+            } else {
+                // var userNameElement = document.querySelector('.followerchat-user-name');
+                // console.log(userNameElement)
+                // if (userNameElement.textContent.trim() !== '') {
+                //     document.getElementById('friends-detailsall').style.display = 'block';
+                //     editProfile.style.display = 'block'; 
+                // }
+                editProfile.style.display = 'block';
+            }
+        }
         $.ajax({
             url: '/get_user_details/',  // Replace '/your-url/' with the actual URL endpoint
             type: 'GET',
             success: function(response) {
                 var userData = response.user_data;
                 var followData = response.follow_data;
+                var friends = response.friends;
+                friendslist(friends)
                 updateChatUsersList(userData)
                 updateNotificationDetails(followData)
                 // Process userData and followData as needed

@@ -293,6 +293,88 @@ nav ul li a:hover {
     font-size: 14px;
 }
 
+
+/* friend list  */
+.friendslist-container {
+    position: fixed;
+    margin-top: 200px;
+    margin-left: 1100px;
+    transform: translate(-50%, -50%);
+    background-color: #ffffff;
+    border: 2px solid rgb(255, 255, 255);
+    border-radius: 20px;
+    padding: 20px;
+    width: 600px;
+    max-height: 250px; 
+    overflow-y: scroll;
+    direction: ltr;
+}
+
+.friendslist-container img.friendslistprofile-picture {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%; 
+    height: auto; /* Maintains aspect ratio */
+    object-fit: cover; /* Ensure the image covers the entire area */
+    border-radius: 5%; /* Display the image in a round shape */
+    width: 120px;
+    height: 120px;
+}
+
+.friendslist-container .friendslist-user-item {
+    display: flex; /* Use flexbox for layout */
+    align-items: center; /* Align items vertically */
+    margin-bottom: 20px; /* Adjust margin between list items */
+}
+.friendslist-container {
+    display: none;
+}
+.friendslist-user-name {
+    flex: 1; /* Allow the name to take up remaining space */
+    margin-left: 20px; /* Adjust margin between name and image */
+}
+
+.friendslist-buttons {
+    width: 150px;
+    margin-left: auto; /* Push buttons to the right */
+    margin-bottom: 10px; 
+    display: block;
+}
+.friendslist-buttons button {
+    display: block; /* Ensure each button is displayed as a block element */
+    margin-bottom: 10px; /* Add margin below each button */
+}
+.friendslist-container .friendslist-users-list {
+    list-style-type: none; /* Removes bullets from the list */
+}
+
+.friendslist-container::-webkit-scrollbar {
+    display: none;
+    width: 8px; /* Width of the scrollbar */
+}
+
+.friendslist-container::-webkit-scrollbar-thumb {
+    background-color: #888; /* Color of the scrollbar thumb */
+    border-radius: 4px;
+}
+
+.friendslist-user-item:last-child {
+    margin-right: 0;
+}
+
+.friendslist-user-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-bottom: 5px;
+}
+
+.friendslist-user-name {
+    margin: 0;
+    font-size: 14px;
+}
+
+
 /* Profile picture preview */
 .profile-preview {
     display: block;
