@@ -370,7 +370,7 @@ nav ul li a:hover {
 }
 
 .friendslist-user-name {
-    margin: 0;
+    margin-left: 100px;
     font-size: 14px;
 }
 

@@ -17,7 +17,7 @@
             <li> <img id="profile-picture-preview1" class="profile-preview1" src="{% static 'image/profile.png' %}" alt="Profile Picture"></li>
             {%endif%}
             <li><a href="/">Home</a></li>
-            <li><a href="#" onclick="showfriends()"><span id="friends-count">Friends 0</span></a></li>
+            <li><a href="#" onclick="showfriends()">Friends <span id="friends-count">0</span></a></li>
             <li><a href="#" onclick="showNotifications()">Notifications <span id="notification-count">0</span></a></li>
             <li class="dropdown">
                 <a href="#">Settings</a>
@@ -68,7 +68,6 @@
                     <span class="friendslist-user-name"></span>
                     <div class="friendslist-buttons">
                         <button class="friendslist-user-action">Accept</button><br><br>
-                        <button class="friendslist-user-action">Decline</button>
                     </div>
                 </div>
             </li>
@@ -147,14 +146,12 @@
             var chatUsersList = document.querySelector('.followerchat-users-list');
             chatUsersList.innerHTML = '';
             var totalFollowerCount = 0;
-            console.log("==========",users)
             users.forEach(profile => {
 
                 var followerItem = document.createElement('li');
                 followerItem.className = 'followerchat-user-item';
                 
                 var userImg = document.createElement('img');
-                console.log(profile.profile_url)
                 if(profile.profile_url=== "Not"){
                     userImg.src ="{% static 'image/profile.png' %}";
                 }
@@ -229,51 +226,57 @@ function submitAction(username, action) {
     xhr.send(data);
 }
 
-        function friendslist(user) {
-            console.log(users)
+        function friendslist(users) {
             var chatUsersList = document.querySelector('.friendslist-users-list');
             chatUsersList.innerHTML = '';
-            users.forEach(user => {
-                // Skip adding the current user's profile
-                if (user.follower_profiles || user.followers_profile){
-                    return;
-                }
+            var totalFollowerCount = 0;
+            console.log("==========",users)
+            users.forEach(profile => {
+
+                var followerItem = document.createElement('li');
+                followerItem.className = 'friendslist-user-item';
                 
-                if (user.name === currentusername) {
-                    return;
-                }
-                
-                var listItem = document.createElement('li');
-                listItem.className = 'chat-user-item';
-                listItem.onclick = function() {
-                    if (user.profile === "Not") {
-                        showUserProfile(user.name, user.bio, "{% static 'image/profile.png' %}",user.followbtn);
-                    }
-                    else{
-                        showUserProfile(user.name, user.bio,  "data:image;base64,"+user.profile,user.followbtn);
-                    }
-                };
                 var userImg = document.createElement('img');
-                if (user.profile === "Not") {
-                    userImg.src="{% static 'image/profile.png' %}";
+                console.log(profile.profile_url)
+                if(profile.profile_url=== "Not"){
+                    userImg.src ="{% static 'image/profile.png' %}";
                 }
                 else{
-                    userImg.src = "data:image;base64," + user.profile;
+                    userImg.src = "data:image;base64," +profile.profile_url;
                 }
                 
-                userImg.alt = user.name;
-                userImg.className = 'chat-user-img';
-                listItem.appendChild(userImg);
+                userImg.alt = profile.username;
+                userImg.className = 'friendslistprofile-picture';
+                followerItem.appendChild(userImg);
 
                 var userName = document.createElement('span');
-                userName.className = 'chat-user-name';
-                userName.textContent = user.name;
-                listItem.appendChild(userName);
+                userName.className = 'friendslist-user-name';
+                userName.textContent = profile.username;
+                followerItem.appendChild(userName);
 
-                chatUsersList.appendChild(listItem);
+                var followerButtons = document.createElement('div');
+                followerButtons.className = 'friendslist-buttons';
+
+                var acceptButton = document.createElement('button');
+                acceptButton.textContent = 'Accept';
+                acceptButton.className = 'friendslist-user-action';
+                // Add event listener for accept button
+                acceptButton.addEventListener('click', function() {
+                    submitAction(profile.username, 'accept');
+                    acceptButton.style.display='none'
+
+                });
+                followerButtons.appendChild(acceptButton);
+
+                followerItem.appendChild(followerButtons);
+
+                chatUsersList.appendChild(followerItem);
+                totalFollowerCount++;
             });
-        }
 
+            document.getElementById('friends-count').textContent = totalFollowerCount;
+            
+        }
 
         // Function to update chat users list
         function updateChatUsersList(users) {
@@ -364,6 +367,7 @@ function submitAction(username, action) {
                 var userData = response.user_data;
                 var followData = response.follow_data;
                 var friends = response.friends;
+                console.log("ok",friends)
                 friendslist(friends)
                 updateChatUsersList(userData)
                 updateNotificationDetails(followData)

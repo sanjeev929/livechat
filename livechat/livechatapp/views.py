@@ -386,7 +386,7 @@ def get_user_details(request):
             pass
         random.shuffle(user_data)
         user_data = user_data[:4]
-        print(follow_data)
+        print("yes",friends)
         return JsonResponse({'user_data': user_data, 'follow_data':follow_data,"friends":friends })
     except Exception as e:
         return redirect("/")    
